@@ -1,4 +1,4 @@
-Gerar executável
+Gerar executável (Não obrigatório. O script pode rodar direto do Visual Studio Code, Thonny ou outra IDE)
 
 #Abra o Prompt de comando cmd e digite
 pip install pyinstaller
