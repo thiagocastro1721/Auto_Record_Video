@@ -4,4 +4,6 @@ Ao iniciar, o usuário deve informar a duração da gravação em minutos. O pro
 
 Teclado numérico necessário, caso contrário edite o código com outros atalhos de teclado compatíveis com a sua máquina.
 
+Reserve o máximo de memória RAM para um melhor desempenho.
+
 Desenvolvido para Windows 11.
