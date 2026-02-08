@@ -91,10 +91,11 @@ def main():
     messagebox.showinfo(
         "Automação OBS - Global Hotkeys",
         "Certifique-se de que:\n\n"
+        "✓ Você tenha um teclado numérico com Num Lock ativado para digitar a duração\n"
         "✓ OBS está aberto\n"
         "✓ Atalhos do OBS são GLOBAIS:\n"
-        "  • NumPad 1 = Iniciar gravação\n"
-        "  • NumPad 2 = Parar gravação\n"
+        "  • Tecla 1 do teclado não numérico = Iniciar gravação.\n"
+        "  • Tecla 2 do teclado não numérico = Parar gravação.\n"
         "✓ O player de vídeo está aberto no Chrome\n\n"
         "⚠️ NÃO mexa no mouse/teclado após clicar OK\n"
         "⚠️ Pressione CTRL+SHIFT+Q para ABORTAR a qualquer momento\n\n"
@@ -104,7 +105,7 @@ def main():
     # Duração
     duracao_minutos = simpledialog.askfloat(
         "Duração do vídeo",
-        "Digite a duração (em minutos):",
+        "Digite a duração (em minutos) no teclado numérico:",
         minvalue=0.1,
         maxvalue=999
     )
