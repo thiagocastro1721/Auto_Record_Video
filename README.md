@@ -7,11 +7,11 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
 ## 📋 Índice
 
 1. [Requisitos do Sistema](#-requisitos-do-sistema)
-2. [Vídeo Tutorial](#-vídeo-tutorial-opcional)
-3. [Gerar Executável (Opcional)](#-gerar-executável-opcional)
-4. [Configuração do Google Chrome](#-configuração-obrigatória-do-google-chrome)
-5. [Configuração do Windows](#-configuração-obrigatória-do-windows)
-6. [Configuração do OBS Studio](#-configuração-obrigatória-do-obs-studio)
+2. [Gerar Executável (Opcional)](#-gerar-executável-opcional)
+3. [Configuração do Google Chrome](#-configuração-obrigatória-do-google-chrome)
+4. [Configuração do Windows](#-configuração-obrigatória-do-windows)
+5. [Configuração do OBS Studio](#-configuração-obrigatória-do-obs-studio)
+6. [Vídeo Tutorial de Configuração](#-vídeo-tutorial-de-configuração)
 7. [Como Usar](#-como-usar-o-script)
 8. [Atalhos de Teclado](#%EF%B8%8F-atalhos-de-teclado)
 9. [Solução de Problemas](#-solução-de-problemas)
@@ -27,16 +27,6 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
   - OBS Studio (versão 28 ou superior recomendada)
   - Python 3.8+ com as bibliotecas: `pyautogui`, `pydirectinput`, `pygetwindow`, `keyboard`
 - **Hardware:** Recomenda-se RAM suficiente (8GB+) e processador razoável para gravação fluida
-
----
-
-## 🎬 Vídeo Tutorial (Opcional)
-
-Se preferir assistir um vídeo explicativo completo sobre a configuração, acesse:
-
-**🔗 [Tutorial em Vídeo](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
-
-Caso prefira seguir o passo a passo em texto, continue lendo as seções abaixo.
 
 ---
 
@@ -280,6 +270,19 @@ O script precisa que o OBS responda a comandos mesmo quando está em segundo pla
 Se seu teclado não possui um teclado numérico dedicado:
 - Você precisará editar o código do script para usar outros atalhos
 - Modifique também os atalhos do OBS conforme sua necessidade
+
+---
+
+## 🎬 Vídeo Tutorial de Configuração
+
+Se preferir assistir um vídeo explicativo completo sobre todas as configurações acima (Chrome, Windows e OBS), acesse:
+
+**🔗 [Tutorial em Vídeo - Configuração Completa](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
+
+Este vídeo mostra visualmente:
+- ✅ Como desabilitar aceleração gráfica no Chrome
+- ✅ Como configurar alto desempenho gráfico no Windows
+- ✅ Como configurar atalhos globais no OBS Studio
 
 ---
 
