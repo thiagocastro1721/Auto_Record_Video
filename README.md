@@ -86,7 +86,7 @@ Crie uma pasta específica para o projeto. Exemplo:
 C:\Users\[SeuUsuário]\Documentos\Automacao_OBS\
 ```
 
-Coloque o arquivo `automacao_obs_3_campos.py` dentro desta pasta.
+Coloque o arquivo `Auto_Record_Video.py` dentro desta pasta.
 
 #### 4️⃣ Navegar até a Pasta no CMD
 
@@ -107,13 +107,13 @@ cd C:\Users\[SeuUsuário]\Documentos\Automacao_OBS
 Com o CMD já na pasta correta, execute o comando:
 
 ```bash
-python -m PyInstaller --onefile --noconsole automacao_obs_3_campos.py
+python -m PyInstaller --onefile --noconsole Auto_Record_Video.py
 ```
 
 **Explicação dos parâmetros:**
 - `--onefile` → Cria um único arquivo `.exe` (mais prático)
 - `--noconsole` → Não abre janela preta do console ao executar
-- `automacao_obs_3_campos.py` → Nome do seu script
+- `Auto_Record_Video.py` → Nome do seu script
 
 #### 6️⃣ Aguardar a Compilação
 
@@ -129,17 +129,17 @@ Isso pode levar de 30 segundos a 2 minutos dependendo do seu computador.
 Após a conclusão, o executável estará em:
 
 ```
-C:\Users\[SeuUsuário]\Documentos\Automacao_OBS\dist\automacao_obs_3_campos.exe
+C:\Users\[SeuUsuário]\Documentos\Automacao_OBS\dist\Auto_Record_Video.exe
 ```
 
 **📂 Estrutura de pastas criada:**
 ```
 Automacao_OBS/
-├── automacao_obs_3_campos.py          (script original)
-├── automacao_obs_3_campos.spec        (arquivo de configuração)
+├── Auto_Record_Video.py          (script original)
+├── Auto_Record_Video.spec        (arquivo de configuração)
 ├── build/                              (pasta temporária)
 └── dist/
-    └── automacao_obs_3_campos.exe     ⭐ SEU EXECUTÁVEL AQUI!
+    └── Auto_Record_Video.exe     ⭐ SEU EXECUTÁVEL AQUI!
 ```
 
 #### 8️⃣ Usar o Executável
@@ -165,7 +165,7 @@ Se quiser um ícone personalizado no executável:
 3. Use o comando:
 
 ```bash
-python -m PyInstaller --onefile --noconsole --icon=icone.ico automacao_obs_3_campos.py
+python -m PyInstaller --onefile --noconsole --icon=icone.ico Auto_Record_Video.py
 ```
 
 ### 🔄 Recompilar Após Mudanças
@@ -190,7 +190,7 @@ python -m pip install --upgrade pyinstaller
 Solução:
 - Remova `--noconsole` para ver os erros:
 ```bash
-python -m PyInstaller --onefile automacao_obs_3_campos.py
+python -m PyInstaller --onefile Auto_Record_Video.py
 ```
 - Execute o `.exe` pelo CMD para ver mensagens de erro
 
@@ -297,7 +297,7 @@ Se seu teclado não possui um teclado numérico dedicado:
 
 ### Executando o Script
 
-1. Execute o arquivo Python: `python automacao_obs_3_campos.py`
+1. Execute o arquivo Python: `python Auto_Record_Video.py`
 
 2. **Primeira janela:** Leia as instruções e clique em **"OK"**
 
