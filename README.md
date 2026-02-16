@@ -7,11 +7,11 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
 ## 📋 Índice
 
 1. [Requisitos do Sistema](#-requisitos-do-sistema)
-2. [Gerar Executável (Opcional)](#-gerar-executável-opcional)
+2. [Vídeo Tutorial de Configuração](#-vídeo-tutorial-de-configuração)
 3. [Configuração do Google Chrome](#-configuração-obrigatória-do-google-chrome)
 4. [Configuração do Windows](#-configuração-obrigatória-do-windows)
 5. [Configuração do OBS Studio](#-configuração-obrigatória-do-obs-studio)
-6. [Vídeo Tutorial de Configuração](#-vídeo-tutorial-de-configuração)
+6. [Gerar Executável (Opcional)](#-gerar-executável-opcional)
 7. [Como Usar](#-como-usar-o-script)
 8. [Atalhos de Teclado](#%EF%B8%8F-atalhos-de-teclado)
 9. [Solução de Problemas](#-solução-de-problemas)
@@ -27,6 +27,112 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
   - OBS Studio (versão 28 ou superior recomendada)
   - Python 3.8+ com as bibliotecas: `pyautogui`, `pydirectinput`, `pygetwindow`, `keyboard`
 - **Hardware:** Recomenda-se RAM suficiente (8GB+) e processador razoável para gravação fluida
+
+---
+
+## 🎬 Vídeo Tutorial de Configuração
+
+Se preferir assistir um vídeo explicativo completo sobre todas as configurações abaixo (Chrome, Windows e OBS), acesse:
+
+**🔗 [Tutorial em Vídeo - Configuração Completa](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
+
+Este vídeo mostra visualmente:
+- ✅ Como desabilitar aceleração gráfica no Chrome
+- ✅ Como configurar alto desempenho gráfico no Windows
+- ✅ Como configurar atalhos globais no OBS Studio
+
+---
+
+## 🌐 Configuração Obrigatória do Google Chrome
+
+### ⚠️ Desabilitar Aceleração Gráfica
+
+Esta etapa é **ESSENCIAL** para evitar travamentos e garantir gravação suave.
+
+**Passo a passo:**
+
+1. Abra o Google Chrome
+2. Cole este endereço na barra de navegação e pressione Enter:
+   ```
+   chrome://settings/system
+   ```
+3. Localize a opção: **"Usar aceleração gráfica quando disponível"**
+4. **Desative** esta opção (o botão deve ficar cinza/desligado)
+5. Reinicie o Chrome para aplicar as mudanças
+
+**📌 Por que fazer isso?**
+A aceleração gráfica pode causar conflitos com a captura de tela do OBS, resultando em tela preta ou travamentos.
+
+---
+
+## 🪟 Configuração Obrigatória do Windows
+
+### ⚙️ Configurar OBS para Alto Desempenho Gráfico
+
+Esta configuração garante que o Windows priorize o desempenho do OBS.
+
+**Passo a passo detalhado:**
+
+1. Clique no **botão Iniciar** do Windows
+2. Vá em **Configurações** (ícone de engrenagem ⚙️)
+3. Navegue até: **Sistema** → **Tela**
+4. Role até encontrar e clique em: **Configurações de elementos gráficos**
+5. Clique no botão **"Procurar"**
+6. Navegue até a pasta de instalação do OBS:
+   - Normalmente está em: `C:\Program Files\obs-studio\bin\64bit\obs64.exe`
+   - Ou procure por "OBS Studio" nos arquivos de programas
+7. Selecione o arquivo **`obs64.exe`** e clique em **"Adicionar"**
+8. Com o OBS já listado, clique no botão **"Opções"** ao lado dele
+9. Selecione a opção: **"Alto desempenho"**
+10. Clique em **"Salvar"**
+
+**📌 Por que fazer isso?**
+Garante que a GPU dedicada (se disponível) seja usada pelo OBS, melhorando drasticamente a qualidade e performance da gravação.
+
+---
+
+## 🎙️ Configuração Obrigatória do OBS Studio
+
+### ⌨️ Configurar Atalhos Globais
+
+O script precisa que o OBS responda a comandos mesmo quando está em segundo plano.
+
+**Passo a passo:**
+
+1. Abra o **OBS Studio**
+2. Vá em: **Arquivo** → **Configurações** (ou pressione `Ctrl + ,`)
+3. No menu lateral, clique em **"Atalhos de Teclado"**
+4. Localize as seguintes opções e configure:
+
+   | Função | Atalho | Observação |
+   |--------|--------|------------|
+   | **Iniciar Gravação** | Tecla **1** (alfanumérica) | ⚠️ NÃO use o teclado numérico |
+   | **Parar Gravação** | Tecla **2** (alfanumérica) | ⚠️ NÃO use o teclado numérico |
+
+5. Clique em **"Aplicar"** e depois em **"OK"**
+
+**📌 Importante:**
+- Use as teclas **1** e **2** da linha principal do teclado (acima das letras Q, W, E)
+- **NÃO** use o teclado numérico (Numpad) para esses atalhos
+- O teclado numérico será usado apenas para digitar a duração da gravação
+
+**💡 Não tem teclado numérico?**
+Se seu teclado não possui um teclado numérico dedicado:
+- Você precisará editar o código do script para usar outros atalhos
+- Modifique também os atalhos do OBS conforme sua necessidade
+
+---
+
+## 🎬 Vídeo Tutorial de Configuração
+
+Se preferir assistir um vídeo explicativo completo sobre todas as configurações acima (Chrome, Windows e OBS), acesse:
+
+**🔗 [Tutorial em Vídeo - Configuração Completa](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
+
+Este vídeo mostra visualmente:
+- ✅ Como desabilitar aceleração gráfica no Chrome
+- ✅ Como configurar alto desempenho gráfico no Windows
+- ✅ Como configurar atalhos globais no OBS Studio
 
 ---
 
@@ -190,99 +296,6 @@ Solução:
 - É um falso positivo comum com PyInstaller
 - Adicione exceção no antivírus
 - Ou assine digitalmente o executável (avançado)
-
----
-
-## 🌐 Configuração Obrigatória do Google Chrome
-
-### ⚠️ Desabilitar Aceleração Gráfica
-
-Esta etapa é **ESSENCIAL** para evitar travamentos e garantir gravação suave.
-
-**Passo a passo:**
-
-1. Abra o Google Chrome
-2. Cole este endereço na barra de navegação e pressione Enter:
-   ```
-   chrome://settings/system
-   ```
-3. Localize a opção: **"Usar aceleração gráfica quando disponível"**
-4. **Desative** esta opção (o botão deve ficar cinza/desligado)
-5. Reinicie o Chrome para aplicar as mudanças
-
-**📌 Por que fazer isso?**
-A aceleração gráfica pode causar conflitos com a captura de tela do OBS, resultando em tela preta ou travamentos.
-
----
-
-## 🪟 Configuração Obrigatória do Windows
-
-### ⚙️ Configurar OBS para Alto Desempenho Gráfico
-
-Esta configuração garante que o Windows priorize o desempenho do OBS.
-
-**Passo a passo detalhado:**
-
-1. Clique no **botão Iniciar** do Windows
-2. Vá em **Configurações** (ícone de engrenagem ⚙️)
-3. Navegue até: **Sistema** → **Tela**
-4. Role até encontrar e clique em: **Configurações de elementos gráficos**
-5. Clique no botão **"Procurar"**
-6. Navegue até a pasta de instalação do OBS:
-   - Normalmente está em: `C:\Program Files\obs-studio\bin\64bit\obs64.exe`
-   - Ou procure por "OBS Studio" nos arquivos de programas
-7. Selecione o arquivo **`obs64.exe`** e clique em **"Adicionar"**
-8. Com o OBS já listado, clique no botão **"Opções"** ao lado dele
-9. Selecione a opção: **"Alto desempenho"**
-10. Clique em **"Salvar"**
-
-**📌 Por que fazer isso?**
-Garante que a GPU dedicada (se disponível) seja usada pelo OBS, melhorando drasticamente a qualidade e performance da gravação.
-
----
-
-## 🎙️ Configuração Obrigatória do OBS Studio
-
-### ⌨️ Configurar Atalhos Globais
-
-O script precisa que o OBS responda a comandos mesmo quando está em segundo plano.
-
-**Passo a passo:**
-
-1. Abra o **OBS Studio**
-2. Vá em: **Arquivo** → **Configurações** (ou pressione `Ctrl + ,`)
-3. No menu lateral, clique em **"Atalhos de Teclado"**
-4. Localize as seguintes opções e configure:
-
-   | Função | Atalho | Observação |
-   |--------|--------|------------|
-   | **Iniciar Gravação** | Tecla **1** (alfanumérica) | ⚠️ NÃO use o teclado numérico |
-   | **Parar Gravação** | Tecla **2** (alfanumérica) | ⚠️ NÃO use o teclado numérico |
-
-5. Clique em **"Aplicar"** e depois em **"OK"**
-
-**📌 Importante:**
-- Use as teclas **1** e **2** da linha principal do teclado (acima das letras Q, W, E)
-- **NÃO** use o teclado numérico (Numpad) para esses atalhos
-- O teclado numérico será usado apenas para digitar a duração da gravação
-
-**💡 Não tem teclado numérico?**
-Se seu teclado não possui um teclado numérico dedicado:
-- Você precisará editar o código do script para usar outros atalhos
-- Modifique também os atalhos do OBS conforme sua necessidade
-
----
-
-## 🎬 Vídeo Tutorial de Configuração
-
-Se preferir assistir um vídeo explicativo completo sobre todas as configurações acima (Chrome, Windows e OBS), acesse:
-
-**🔗 [Tutorial em Vídeo - Configuração Completa](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
-
-Este vídeo mostra visualmente:
-- ✅ Como desabilitar aceleração gráfica no Chrome
-- ✅ Como configurar alto desempenho gráfico no Windows
-- ✅ Como configurar atalhos globais no OBS Studio
 
 ---
 
