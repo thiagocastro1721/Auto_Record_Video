@@ -8,12 +8,13 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
 
 1. [Requisitos do Sistema](#-requisitos-do-sistema)
 2. [Vídeo Tutorial](#-vídeo-tutorial-opcional)
-3. [Configuração do Google Chrome](#-configuração-obrigatória-do-google-chrome)
-4. [Configuração do Windows](#-configuração-obrigatória-do-windows)
-5. [Configuração do OBS Studio](#-configuração-obrigatória-do-obs-studio)
-6. [Como Usar](#-como-usar-o-script)
-7. [Atalhos de Teclado](#%EF%B8%8F-atalhos-de-teclado)
-8. [Solução de Problemas](#-solução-de-problemas)
+3. [Gerar Executável (Opcional)](#-gerar-executável-opcional)
+4. [Configuração do Google Chrome](#-configuração-obrigatória-do-google-chrome)
+5. [Configuração do Windows](#-configuração-obrigatória-do-windows)
+6. [Configuração do OBS Studio](#-configuração-obrigatória-do-obs-studio)
+7. [Como Usar](#-como-usar-o-script)
+8. [Atalhos de Teclado](#%EF%B8%8F-atalhos-de-teclado)
+9. [Solução de Problemas](#-solução-de-problemas)
 
 ---
 
@@ -36,6 +37,169 @@ Se preferir assistir um vídeo explicativo completo sobre a configuração, aces
 **🔗 [Tutorial em Vídeo](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
 
 Caso prefira seguir o passo a passo em texto, continue lendo as seções abaixo.
+
+---
+
+## 🔧 Gerar Executável (Opcional)
+
+Esta etapa é **opcional**. O script pode ser executado diretamente do:
+- Visual Studio Code
+- Thonny
+- PyCharm ou outra IDE
+- Terminal/CMD com Python
+
+**💡 Por que gerar um executável?**
+- Não precisa abrir IDE toda vez
+- Duplo clique para executar (como qualquer programa)
+- Mais prático para uso frequente
+- Não precisa ter Python visível no sistema
+
+### Passo a Passo para Criar o Executável
+
+#### 1️⃣ Instalar o PyInstaller
+
+Abra o **Prompt de Comando** (CMD) como Administrador e digite:
+
+```bash
+pip install pyinstaller
+```
+
+Aguarde a instalação terminar.
+
+#### 2️⃣ Verificar se a Instalação foi Bem-sucedida
+
+No mesmo CMD, digite:
+
+```bash
+pyinstaller --version
+```
+
+Deve aparecer algo como: `6.11.1` (ou outra versão)
+
+Se aparecer a versão, a instalação foi bem-sucedida! ✅
+
+#### 3️⃣ Organizar os Arquivos
+
+Crie uma pasta específica para o projeto. Exemplo:
+
+```
+C:\Users\[SeuUsuário]\Documentos\Automacao_OBS\
+```
+
+Coloque o arquivo `automacao_obs_3_campos.py` dentro desta pasta.
+
+#### 4️⃣ Navegar até a Pasta no CMD
+
+No Prompt de Comando, navegue até a pasta criada usando o comando `cd`:
+
+```bash
+cd C:\Users\[SeuUsuário]\Documentos\Automacao_OBS
+```
+
+**💡 Dica:** Você pode copiar o caminho da pasta no Windows Explorer e colar no CMD.
+
+**🖱️ Atalho rápido:**
+- No Windows Explorer, segure `Shift` e clique com botão direito na pasta
+- Escolha "Abrir janela do PowerShell aqui" ou "Abrir no Terminal"
+
+#### 5️⃣ Gerar o Executável
+
+Com o CMD já na pasta correta, execute o comando:
+
+```bash
+python -m PyInstaller --onefile --noconsole automacao_obs_3_campos.py
+```
+
+**Explicação dos parâmetros:**
+- `--onefile` → Cria um único arquivo `.exe` (mais prático)
+- `--noconsole` → Não abre janela preta do console ao executar
+- `automacao_obs_3_campos.py` → Nome do seu script
+
+#### 6️⃣ Aguardar a Compilação
+
+O PyInstaller irá:
+- Analisar o script
+- Coletar todas as dependências
+- Criar o executável
+
+Isso pode levar de 30 segundos a 2 minutos dependendo do seu computador.
+
+#### 7️⃣ Localizar o Executável
+
+Após a conclusão, o executável estará em:
+
+```
+C:\Users\[SeuUsuário]\Documentos\Automacao_OBS\dist\automacao_obs_3_campos.exe
+```
+
+**📂 Estrutura de pastas criada:**
+```
+Automacao_OBS/
+├── automacao_obs_3_campos.py          (script original)
+├── automacao_obs_3_campos.spec        (arquivo de configuração)
+├── build/                              (pasta temporária)
+└── dist/
+    └── automacao_obs_3_campos.exe     ⭐ SEU EXECUTÁVEL AQUI!
+```
+
+#### 8️⃣ Usar o Executável
+
+Agora você pode:
+
+✅ Copiar o arquivo `.exe` da pasta `dist` para onde quiser
+✅ Criar um atalho na Área de Trabalho
+✅ Executar com duplo clique
+✅ O executável é **portátil** (pode copiar para outro PC Windows)
+
+**⚠️ Importante:**
+- O executável gerado funciona **apenas no Windows**
+- Antivírus podem dar falso positivo (é normal com PyInstaller)
+- Se o antivírus bloquear, adicione uma exceção
+
+### 🎨 Adicionar Ícone Personalizado (Opcional)
+
+Se quiser um ícone personalizado no executável:
+
+1. Obtenha um arquivo `.ico` (ícone)
+2. Coloque-o na mesma pasta do script
+3. Use o comando:
+
+```bash
+python -m PyInstaller --onefile --noconsole --icon=icone.ico automacao_obs_3_campos.py
+```
+
+### 🔄 Recompilar Após Mudanças
+
+Se você modificar o script:
+
+1. Delete as pastas `build` e `dist`
+2. Execute o comando do PyInstaller novamente
+3. Um novo executável será gerado com as mudanças
+
+### 🚨 Solução de Problemas - PyInstaller
+
+**Problema: "pyinstaller não é reconhecido como comando"**
+
+Solução:
+```bash
+python -m pip install --upgrade pyinstaller
+```
+
+**Problema: Executável não abre / fecha imediatamente**
+
+Solução:
+- Remova `--noconsole` para ver os erros:
+```bash
+python -m PyInstaller --onefile automacao_obs_3_campos.py
+```
+- Execute o `.exe` pelo CMD para ver mensagens de erro
+
+**Problema: Antivírus bloqueia o executável**
+
+Solução:
+- É um falso positivo comum com PyInstaller
+- Adicione exceção no antivírus
+- Ou assine digitalmente o executável (avançado)
 
 ---
 
