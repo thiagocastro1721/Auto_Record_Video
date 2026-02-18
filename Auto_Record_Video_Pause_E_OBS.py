@@ -106,12 +106,18 @@ def fechar_obs():
 def parar_gravacao_e_sair_fullscreen():
     """
     Sequência de fim de gravação:
-    1. Pausa o vídeo (clique) — imediatamente, enquanto OBS ainda grava
-    2. Para a gravação do OBS (tecla 2)
+    1. Para a gravação do OBS (tecla 2)
+    2. Pausa o vídeo (clique) 
     3. Sai do fullscreen (F11)
     Esta ordem evita segundos extras gravados enquanto a UI do OBS responde.
     """
-    # 1. Reativar Chrome e pausar o vídeo IMEDIATAMENTE
+    
+    # 1. Parar gravação OBS
+    print("⏹️ Parando gravação OBS (Tecla 2)...")
+    pydirectinput.press('2')
+    time.sleep(1.5)  # Aguarda OBS finalizar o arquivo
+    
+    # 2. Reativar Chrome e pausar o vídeo IMEDIATAMENTE
     # O vídeo é pausado primeiro para não gravar frames extras
     print("🌐 Re-ativando janela do Chrome...")
     chrome_windows = gw.getWindowsWithTitle("Chrome")
@@ -123,11 +129,6 @@ def parar_gravacao_e_sair_fullscreen():
     pyautogui.moveTo(largura // 2, altura // 2, duration=0.2)
     pyautogui.click()
     time.sleep(0.5)
-
-    # 2. Parar gravação OBS — vídeo já está pausado, sem frames extras
-    print("⏹️ Parando gravação OBS (Tecla 2)...")
-    pydirectinput.press('2')
-    time.sleep(1.5)  # Aguarda OBS finalizar o arquivo
 
     # 3. Sair do fullscreen
     print("🖥️ Saindo do fullscreen (F11)...")
@@ -403,7 +404,7 @@ def main():
     # OVERHEAD_FINALIZACAO: tempo real gasto pela sequência de parada
     # (ativar chrome + clicar + parar OBS + F11) — descontado do timer
     # para que a gravação termine exatamente na duração configurada.
-    OVERHEAD_FINALIZACAO = 2  # segundos — ajuste se ainda sobrar/faltar
+    OVERHEAD_FINALIZACAO = 1  # segundos — ajuste se ainda sobrar/faltar
 
     print(f"\n⏱️ Gravação ativa! Duração: {tempo_formatado}")
     tempo_fim = time.time() + duracao_segundos - OVERHEAD_FINALIZACAO
