@@ -87,7 +87,7 @@ def garantir_obs_aberto():
         print(".", end="", flush=True)
         if obs_processo_rodando():
             print(" ✓")
-            time.sleep(10)  # OBS demora ~7s para registrar hotkeys globais
+            time.sleep(3)  # OBS demora ~7s para registrar hotkeys globais
             return True
 
     print(" ✗ Timeout — OBS não iniciou em 30s")
@@ -105,28 +105,31 @@ def fechar_obs():
 
 def parar_gravacao_e_sair_fullscreen():
     """
-    Sequência de parar gravação, pausar vídeo e sair do fullscreen.
-    Totalmente isolada de qualquer janela Tk para evitar roubo de foco.
+    Sequência de fim de gravação:
+    1. Pausa o vídeo (clique) — imediatamente, enquanto OBS ainda grava
+    2. Para a gravação do OBS (tecla 2)
+    3. Sai do fullscreen (F11)
+    Esta ordem evita segundos extras gravados enquanto a UI do OBS responde.
     """
-    # 1. Parar gravação OBS via hotkey global
-    print("⏹️ Parando gravação OBS (Tecla 2)...")
-    pydirectinput.press('2')
-    time.sleep(1.5)  # Aguarda OBS confirmar parada
-
-    # 2. Garantir que o Chrome/player ainda tem foco antes de interagir
+    # 1. Reativar Chrome e pausar o vídeo IMEDIATAMENTE
+    # O vídeo é pausado primeiro para não gravar frames extras
     print("🌐 Re-ativando janela do Chrome...")
     chrome_windows = gw.getWindowsWithTitle("Chrome")
     if chrome_windows:
         chrome_windows[0].activate()
-        time.sleep(0.8)
+        time.sleep(0.5)
 
-    # 3. Clicar no centro — o clique já pausa o vídeo no player HTML5
-    print("🖱️ Clicando no centro da tela (pausa o vídeo + foco)...")
-    pyautogui.moveTo(largura // 2, altura // 2, duration=0.3)
+    print("🖱️ Pausando vídeo (clique no centro)...")
+    pyautogui.moveTo(largura // 2, altura // 2, duration=0.2)
     pyautogui.click()
-    time.sleep(0.8)
+    time.sleep(0.5)
 
-    # 4. Sair do fullscreen
+    # 2. Parar gravação OBS — vídeo já está pausado, sem frames extras
+    print("⏹️ Parando gravação OBS (Tecla 2)...")
+    pydirectinput.press('2')
+    time.sleep(1.5)  # Aguarda OBS finalizar o arquivo
+
+    # 3. Sair do fullscreen
     print("🖥️ Saindo do fullscreen (F11)...")
     pyautogui.press('f11')
     time.sleep(1.0)
@@ -397,28 +400,39 @@ def main():
 
     gravacao_ativa = True
 
+    # OVERHEAD_FINALIZACAO: tempo real gasto pela sequência de parada
+    # (ativar chrome + clicar + parar OBS + F11) — descontado do timer
+    # para que a gravação termine exatamente na duração configurada.
+    OVERHEAD_FINALIZACAO = 2  # segundos — ajuste se ainda sobrar/faltar
+
     print(f"\n⏱️ Gravação ativa! Duração: {tempo_formatado}")
-    print(f"   Fim previsto: {time.strftime('%H:%M:%S', time.localtime(time.time() + duracao_segundos))}")
+    tempo_fim = time.time() + duracao_segundos - OVERHEAD_FINALIZACAO
+    print(f"   Fim previsto: {time.strftime('%H:%M:%S', time.localtime(tempo_fim))}")
     print(f"   🔥 CTRL+SHIFT+Q para abortar\n")
 
-    tempo_decorrido = 0
     intervalo_update = 60
+    ultimo_update = time.time()
 
-    while tempo_decorrido < duracao_segundos:
+    while True:
         if deve_abortar:
             executar_abort()
 
-        time.sleep(1)
-        tempo_decorrido += 1
-        tempo_restante = duracao_segundos - tempo_decorrido
+        tempo_restante = tempo_fim - time.time()
 
-        if tempo_restante <= 10 and tempo_restante > 0:
-            print(f"   ⏱️ {tempo_restante}s...")
-        elif tempo_decorrido % intervalo_update == 0 and tempo_restante > 10:
-            horas_rest = tempo_restante // 3600
-            minutos_rest = (tempo_restante % 3600) // 60
-            segundos_rest = tempo_restante % 60
-            print(f"   ⏳ Restam {horas_rest:02d}:{minutos_rest:02d}:{segundos_rest:02d}")
+        if tempo_restante <= 0:
+            break
+
+        if tempo_restante <= 3:
+            print(f"   ⏱️ {int(tempo_restante) + 1}s...")
+            time.sleep(min(0.5, tempo_restante))
+        else:
+            if time.time() - ultimo_update >= intervalo_update:
+                horas_rest = int(tempo_restante) // 3600
+                minutos_rest = (int(tempo_restante) % 3600) // 60
+                segundos_rest = int(tempo_restante) % 60
+                print(f"   ⏳ Restam {horas_rest:02d}:{minutos_rest:02d}:{segundos_rest:02d}")
+                ultimo_update = time.time()
+            time.sleep(min(1, tempo_restante))
 
     print(f"\n   ✓ Concluído! {tempo_formatado}")
 
