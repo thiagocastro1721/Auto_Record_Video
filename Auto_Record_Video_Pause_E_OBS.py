@@ -15,259 +15,44 @@ import sys
 import subprocess
 import os
 import ctypes
-import psutil
 
 # Variáveis globais
 largura, altura = pyautogui.size()
 gravacao_ativa = False
 deve_abortar = False
 
-def abortar():
-    """Abortar gravação ao pressionar CTRL+SHIFT+Q"""
-    global deve_abortar
-    deve_abortar = True
-    print("\n🛑 CTRL+SHIFT+Q DETECTADO - ABORTANDO...")
-
-def executar_abort():
-    """Executa as ações de abort na thread principal"""
-    global gravacao_ativa
-    
-    print("\n" + "="*70)
-    print("  🛑🛑🛑 CANCELANDO GRAVAÇÃO 🛑🛑🛑")
-    print("="*70 + "\n")
-    
-    # ⏹️ PARAR GRAVAÇÃO (GLOBAL)
-    print("⏹️ Parando gravação OBS (Tecla 2)")
-    time.sleep(0.5)
-    pydirectinput.press('2')
-    time.sleep(1)
-    
-    # Clicar no centro para garantir foco
-    print("🖱️ Clicando no centro da tela...")
-    pyautogui.moveTo(largura // 2, altura // 2, duration=0.2)
-    pyautogui.click()
-    time.sleep(0.5)
-    
-    # Sair do fullscreen
-    print("🖥️ Saindo do fullscreen (F11)")
-    pyautogui.press('f11')
-    time.sleep(0.5)
-    
-    gravacao_ativa = False
-    
-    # Mostrar popup — só cria o Tk DEPOIS de toda automação terminar
-    root = Tk() 
-    root.withdraw()
-    root.attributes('-topmost', True)
-    
-    messagebox.showinfo(
-        "⚠️ Gravação Cancelada",
-        "A gravação foi INTERROMPIDA pelo usuário (CTRL+SHIFT+Q).\n\n"
-        "✓ A gravação OBS foi parada\n"
-        "✓ O vídeo parcial foi salvo\n\n"
-        "📁 Verifique o arquivo na pasta de gravações do OBS.",
-        parent=root
-    )
-    
-    root.destroy()
-    
-    print("🛑 Script interrompido pelo usuário")
-    keyboard.unhook_all()
-    sys.exit(0)
-
-def obter_duracao():
-    """Cria janela customizada com 3 campos: horas, minutos, segundos"""
-    
-    resultado = {'duracao': None}
-    
-    def confirmar():
-        try:
-            horas = int(entry_horas.get() or 0)
-            minutos = int(entry_minutos.get() or 0)
-            segundos = int(entry_segundos.get() or 0)
-            
-            # Validações
-            if horas < 0 or minutos < 0 or segundos < 0:
-                messagebox.showerror("Erro", "Valores não podem ser negativos!", parent=janela)
-                return
-            
-            if minutos > 59:
-                messagebox.showerror("Erro", "Minutos: 0 a 59!", parent=janela)
-                return
-                
-            if segundos > 59:
-                messagebox.showerror("Erro", "Segundos: 0 a 59!", parent=janela)
-                return
-            
-            total_segundos = (horas * 3600) + (minutos * 60) + segundos
-            
-            if total_segundos == 0:
-                messagebox.showerror("Erro", "Duração deve ser maior que zero!", parent=janela)
-                return
-            
-            if total_segundos > 86400:
-                resp = messagebox.askyesno(
-                    "Aviso", 
-                    f"Duração muito longa!\n({horas}h {minutos}m {segundos}s)\n\nContinuar mesmo assim?",
-                    parent=janela
-                )
-                if not resp:
-                    return
-            
-            resultado['duracao'] = total_segundos
-            janela.quit()
-            janela.destroy()
-            
-        except ValueError:
-            messagebox.showerror("Erro", "Digite apenas números!", parent=janela)
-    
-    def cancelar():
-        janela.quit()
-        janela.destroy()
-    
-    # Criar janela
-    janela = Tk()
-    janela.title("⏱️ Duração da Gravação")
-    janela.geometry("420x270")
-    janela.resizable(False, False)
-    
-    # FORÇAR aparecer em primeiro plano
-    janela.attributes('-topmost', True)
-    janela.lift()
-    janela.focus_force()
-    
-    # Centralizar na tela
-    janela.update_idletasks()
-    x = (janela.winfo_screenwidth() // 2) - (420 // 2)
-    y = (janela.winfo_screenheight() // 2) - (270 // 2)
-    janela.geometry(f"420x270+{x}+{y}")
-    
-    # Atualizar para garantir que aparece
-    janela.update()
-    janela.deiconify()
-    
-    # Título
-    Label(janela, text="Digite a duração da gravação:", 
-          font=("Arial", 12, "bold")).pack(pady=15)
-    
-    # Frame para os campos
-    frame_campos = Frame(janela)
-    frame_campos.pack(pady=20)
-    
-    # Campo HORAS
-    frame_horas = Frame(frame_campos)
-    frame_horas.grid(row=0, column=0, padx=10)
-    Label(frame_horas, text="Horas", font=("Arial", 10)).pack()
-    entry_horas = Entry(frame_horas, width=6, font=("Arial", 16), justify="center")
-    entry_horas.pack()
-    entry_horas.insert(0, "0")
-    
-    # Campo MINUTOS
-    frame_minutos = Frame(frame_campos)
-    frame_minutos.grid(row=0, column=1, padx=10)
-    Label(frame_minutos, text="Minutos", font=("Arial", 10)).pack()
-    entry_minutos = Entry(frame_minutos, width=6, font=("Arial", 16), justify="center")
-    entry_minutos.pack()
-    entry_minutos.insert(0, "0")
-    
-    # Campo SEGUNDOS
-    frame_segundos = Frame(frame_campos)
-    frame_segundos.grid(row=0, column=2, padx=10)
-    Label(frame_segundos, text="Segundos", font=("Arial", 10)).pack()
-    entry_segundos = Entry(frame_segundos, width=6, font=("Arial", 16), justify="center")
-    entry_segundos.pack()
-    entry_segundos.insert(0, "0")
-    
-    # Dica
-    Label(janela, text="💡 Use o teclado numérico", 
-          font=("Arial", 9), fg="gray").pack(pady=10)
-    
-    # Botões
-    frame_botoes = Frame(janela)
-    frame_botoes.pack(pady=15)
-    
-    Button(frame_botoes, text="✓ Confirmar", command=confirmar, 
-           width=12, height=2, bg="#4CAF50", fg="white", 
-           font=("Arial", 10, "bold")).grid(row=0, column=0, padx=10)
-    
-    Button(frame_botoes, text="✗ Cancelar", command=cancelar, 
-           width=12, height=2, bg="#f44336", fg="white",
-           font=("Arial", 10, "bold")).grid(row=0, column=1, padx=10)
-    
-    # Focar no campo de horas
-    entry_horas.focus_set()
-    entry_horas.select_range(0, 'end')
-    
-    # Bind Enter para confirmar
-    janela.bind('<Return>', lambda e: confirmar())
-    janela.bind('<Escape>', lambda e: cancelar())
-    
-    # Impedir fechamento pela janela
-    janela.protocol("WM_DELETE_WINDOW", cancelar)
-    
-    # CRITICAL: Iniciar loop de eventos
-    janela.mainloop()
-    
-    return resultado['duracao']
-
+# ── CONFIGURAÇÃO OBS ──────────────────────────────────────────────────────────
 OBS_EXE = r"C:\Program Files\obs-studio\bin\64bit\obs64.exe"
-OBS_CWD = r"C:\Program Files\obs-studio\bin\64bit"   # obrigatório: OBS busca en-US.ini aqui
+OBS_CWD = r"C:\Program Files\obs-studio\bin\64bit"  # obrigatório: OBS busca en-US.ini aqui
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _rodar_comando_oculto(args):
+    """
+    Executa um comando de texto sem abrir janela visível.
+    Compatível com VS Code e executáveis PyInstaller --noconsole.
+    """
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    si.wShowWindow = 0  # SW_HIDE — seguro para comandos de texto sem GUI
+    try:
+        return subprocess.check_output(
+            args,
+            startupinfo=si,
+            stderr=subprocess.DEVNULL,
+        ).decode(errors='ignore')
+    except Exception:
+        return None
 
 def obs_processo_rodando():
-    """
-    Verifica se o processo obs64.exe está rodando via psutil.
-    Muito mais confiável que checar títulos de janela.
-    """
-    for proc in psutil.process_iter(['name']):
-        try:
-            if proc.info['name'] and 'obs' in proc.info['name'].lower():
-                return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            pass
-    return False
-
-def minimizar_janelas_obs():
-    """
-    Minimiza todas as janelas cujo processo-dono é obs64.exe,
-    usando EnumWindows + ctypes. Não chama SetForegroundWindow,
-    portanto não rouba o foco de nenhuma outra janela.
-    """
-    SW_MINIMIZE = 6
-    user32 = ctypes.windll.user32
-
-    # Monta set de PIDs do OBS
-    obs_pids = set()
-    for proc in psutil.process_iter(['pid', 'name']):
-        try:
-            if proc.info['name'] and 'obs' in proc.info['name'].lower():
-                obs_pids.add(proc.info['pid'])
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            pass
-
-    if not obs_pids:
-        return
-
-    # Callback para EnumWindows
-    resultados = []
-    WNDENUMPROC = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
-
-    def callback(hwnd, _):
-        pid = ctypes.c_ulong()
-        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-        if pid.value in obs_pids and user32.IsWindowVisible(hwnd):
-            resultados.append(hwnd)
-        return True
-
-    user32.EnumWindows(WNDENUMPROC(callback), 0)
-
-    for hwnd in resultados:
-        user32.ShowWindow(hwnd, SW_MINIMIZE)
+    """Verifica se obs64.exe está rodando usando tasklist."""
+    saida = _rodar_comando_oculto(['tasklist', '/FI', 'IMAGENAME eq obs64.exe', '/NH'])
+    return saida is not None and 'obs64.exe' in saida.lower()
 
 def garantir_obs_aberto():
     """
-    Verifica se OBS está rodando (por processo). Se não estiver,
-    abre com cwd correto para resolver 'Failed to find /en-US.ini'.
-    Minimiza a janela sem roubar foco e aguarda inicialização completa.
+    Verifica se OBS está rodando. Se não estiver, abre com cwd correto
+    (resolve 'Failed to find en-US.ini') e aguarda inicialização completa.
+    A janela do OBS aparece normalmente para o usuário ver.
     """
     if obs_processo_rodando():
         print("✓ OBS já está aberto.")
@@ -280,9 +65,15 @@ def garantir_obs_aberto():
         return False
 
     try:
+        # SW_SHOWNORMAL garante que a janela aparece visível ao usuário,
+        # independente de como o processo pai foi iniciado (VS Code, .exe, etc.)
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        si.wShowWindow = 1  # SW_SHOWNORMAL
         proc = subprocess.Popen(
             [OBS_EXE],
-            cwd=OBS_CWD,          # <-- corrige o erro en-US.ini
+            cwd=OBS_CWD,
+            startupinfo=si,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
@@ -291,24 +82,26 @@ def garantir_obs_aberto():
         print(f"\n❌ Falha ao iniciar OBS: {e}")
         return False
 
-    # Aguarda até 30s o processo estar rodando, minimizando logo que aparecer
-    obs_minimizado = False
     for _ in range(30):
         time.sleep(1)
         print(".", end="", flush=True)
         if obs_processo_rodando():
-            if not obs_minimizado:
-                time.sleep(1)  # pequena pausa para a janela criar o handle
-                minimizar_janelas_obs()
-                obs_minimizado = True
-                print(" (minimizado)", end="", flush=True)
             print(" ✓")
-            time.sleep(10)  # OBS demora ~7s para inicializar completamente (locale, plugins, etc)
+            time.sleep(10)  # OBS demora ~7s para registrar hotkeys globais
             return True
 
     print(" ✗ Timeout — OBS não iniciou em 30s")
     return False
 
+def fechar_obs():
+    """Encerra o processo obs64.exe via taskkill após a gravação ser salva."""
+    print("🔴 Encerrando OBS...")
+    _rodar_comando_oculto(['taskkill', '/F', '/IM', 'obs64.exe'])
+    time.sleep(1)
+    if not obs_processo_rodando():
+        print("   ✓ OBS encerrado.")
+    else:
+        print("   ⚠️ OBS ainda em execução — encerre manualmente se necessário.")
 
 def parar_gravacao_e_sair_fullscreen():
     """
@@ -327,8 +120,7 @@ def parar_gravacao_e_sair_fullscreen():
         chrome_windows[0].activate()
         time.sleep(0.8)
 
-    # 3. Mover mouse para o centro e clicar para dar foco ao player
-    # NOTA: o clique já pausa o vídeo no player HTML5 — não pressionar Space depois
+    # 3. Clicar no centro — o clique já pausa o vídeo no player HTML5
     print("🖱️ Clicando no centro da tela (pausa o vídeo + foco)...")
     pyautogui.moveTo(largura // 2, altura // 2, duration=0.3)
     pyautogui.click()
@@ -339,21 +131,181 @@ def parar_gravacao_e_sair_fullscreen():
     pyautogui.press('f11')
     time.sleep(1.0)
 
+def abortar():
+    """Abortar gravação ao pressionar CTRL+SHIFT+Q"""
+    global deve_abortar
+    deve_abortar = True
+    print("\n🛑 CTRL+SHIFT+Q DETECTADO - ABORTANDO...")
+
+def executar_abort():
+    """Executa as ações de abort na thread principal"""
+    global gravacao_ativa
+
+    print("\n" + "="*70)
+    print("  🛑🛑🛑 CANCELANDO GRAVAÇÃO 🛑🛑🛑")
+    print("="*70 + "\n")
+
+    print("⏹️ Parando gravação OBS (Tecla 2)")
+    time.sleep(0.5)
+    pydirectinput.press('2')
+    time.sleep(1)
+
+    print("🖱️ Clicando no centro da tela...")
+    pyautogui.moveTo(largura // 2, altura // 2, duration=0.2)
+    pyautogui.click()
+    time.sleep(0.5)
+
+    print("🖥️ Saindo do fullscreen (F11)")
+    pyautogui.press('f11')
+    time.sleep(0.5)
+
+    gravacao_ativa = False
+    fechar_obs()
+
+    # Mostrar popup — só cria o Tk DEPOIS de toda automação terminar
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+
+    messagebox.showinfo(
+        "⚠️ Gravação Cancelada",
+        "A gravação foi INTERROMPIDA pelo usuário (CTRL+SHIFT+Q).\n\n"
+        "✓ A gravação OBS foi parada\n"
+        "✓ O vídeo parcial foi salvo\n\n"
+        "📁 Verifique o arquivo na pasta de gravações do OBS.",
+        parent=root
+    )
+
+    root.destroy()
+
+    print("🛑 Script interrompido pelo usuário")
+    keyboard.unhook_all()
+    sys.exit(0)
+
+def obter_duracao():
+    """Cria janela customizada com 3 campos: horas, minutos, segundos"""
+
+    resultado = {'duracao': None}
+
+    def confirmar():
+        try:
+            horas = int(entry_horas.get() or 0)
+            minutos = int(entry_minutos.get() or 0)
+            segundos = int(entry_segundos.get() or 0)
+
+            if horas < 0 or minutos < 0 or segundos < 0:
+                messagebox.showerror("Erro", "Valores não podem ser negativos!", parent=janela)
+                return
+            if minutos > 59:
+                messagebox.showerror("Erro", "Minutos: 0 a 59!", parent=janela)
+                return
+            if segundos > 59:
+                messagebox.showerror("Erro", "Segundos: 0 a 59!", parent=janela)
+                return
+
+            total_segundos = (horas * 3600) + (minutos * 60) + segundos
+
+            if total_segundos == 0:
+                messagebox.showerror("Erro", "Duração deve ser maior que zero!", parent=janela)
+                return
+
+            if total_segundos > 86400:
+                resp = messagebox.askyesno(
+                    "Aviso",
+                    f"Duração muito longa!\n({horas}h {minutos}m {segundos}s)\n\nContinuar mesmo assim?",
+                    parent=janela
+                )
+                if not resp:
+                    return
+
+            resultado['duracao'] = total_segundos
+            janela.quit()
+            janela.destroy()
+
+        except ValueError:
+            messagebox.showerror("Erro", "Digite apenas números!", parent=janela)
+
+    def cancelar():
+        janela.quit()
+        janela.destroy()
+
+    janela = Tk()
+    janela.title("⏱️ Duração da Gravação")
+    janela.geometry("420x270")
+    janela.resizable(False, False)
+    janela.attributes('-topmost', True)
+    janela.lift()
+    janela.focus_force()
+
+    janela.update_idletasks()
+    x = (janela.winfo_screenwidth() // 2) - (420 // 2)
+    y = (janela.winfo_screenheight() // 2) - (270 // 2)
+    janela.geometry(f"420x270+{x}+{y}")
+    janela.update()
+    janela.deiconify()
+
+    Label(janela, text="Digite a duração da gravação:",
+          font=("Arial", 12, "bold")).pack(pady=15)
+
+    frame_campos = Frame(janela)
+    frame_campos.pack(pady=20)
+
+    frame_horas = Frame(frame_campos)
+    frame_horas.grid(row=0, column=0, padx=10)
+    Label(frame_horas, text="Horas", font=("Arial", 10)).pack()
+    entry_horas = Entry(frame_horas, width=6, font=("Arial", 16), justify="center")
+    entry_horas.pack()
+    entry_horas.insert(0, "0")
+
+    frame_minutos = Frame(frame_campos)
+    frame_minutos.grid(row=0, column=1, padx=10)
+    Label(frame_minutos, text="Minutos", font=("Arial", 10)).pack()
+    entry_minutos = Entry(frame_minutos, width=6, font=("Arial", 16), justify="center")
+    entry_minutos.pack()
+    entry_minutos.insert(0, "0")
+
+    frame_segundos = Frame(frame_campos)
+    frame_segundos.grid(row=0, column=2, padx=10)
+    Label(frame_segundos, text="Segundos", font=("Arial", 10)).pack()
+    entry_segundos = Entry(frame_segundos, width=6, font=("Arial", 16), justify="center")
+    entry_segundos.pack()
+    entry_segundos.insert(0, "0")
+
+    Label(janela, text="💡 Use o teclado numérico",
+          font=("Arial", 9), fg="gray").pack(pady=10)
+
+    frame_botoes = Frame(janela)
+    frame_botoes.pack(pady=15)
+
+    Button(frame_botoes, text="✓ Confirmar", command=confirmar,
+           width=12, height=2, bg="#4CAF50", fg="white",
+           font=("Arial", 10, "bold")).grid(row=0, column=0, padx=10)
+
+    Button(frame_botoes, text="✗ Cancelar", command=cancelar,
+           width=12, height=2, bg="#f44336", fg="white",
+           font=("Arial", 10, "bold")).grid(row=0, column=1, padx=10)
+
+    entry_horas.focus_set()
+    entry_horas.select_range(0, 'end')
+    janela.bind('<Return>', lambda e: confirmar())
+    janela.bind('<Escape>', lambda e: cancelar())
+    janela.protocol("WM_DELETE_WINDOW", cancelar)
+    janela.mainloop()
+
+    return resultado['duracao']
+
 def main():
     global gravacao_ativa, deve_abortar
-    
-    # Registrar hotkey ANTES de tudo
+
     keyboard.add_hotkey('ctrl+shift+q', abortar, suppress=True)
     print("✓ Hotkey CTRL+SHIFT+Q registrado")
 
-    # Segurança
     pyautogui.FAILSAFE = True
     pyautogui.PAUSE = 0.15
-    
-    # Primeira mensagem
+
     root_msg = Tk()
     root_msg.withdraw()
-    
+
     messagebox.showinfo(
         "Automação OBS - Global Hotkeys",
         "Certifique-se de que:\n\n"
@@ -368,21 +320,18 @@ def main():
         "Clique OK para continuar...",
         parent=root_msg
     )
-    
+
     root_msg.destroy()
 
-    # Obter duração com 3 campos
     duracao_segundos = obter_duracao()
-    
+
     if duracao_segundos is None:
         keyboard.unhook_all()
         return
 
-    # Converter para exibição
     horas = duracao_segundos // 3600
     minutos = (duracao_segundos % 3600) // 60
     segundos = duracao_segundos % 60
-    
     tempo_formatado = f"{horas:02d}:{minutos:02d}:{segundos:02d}"
 
     print(f"\n{'='*70}")
@@ -392,7 +341,6 @@ def main():
 
     # ── VERIFICAR / ABRIR OBS ─────────────────────────────────────────────────
     # Feito ANTES de mexer no Chrome para não perder o foco do navegador depois.
-    # O OBS é aberto minimizado/em background, sem jamais se tornar janela ativa.
     # ─────────────────────────────────────────────────────────────────────────
     print("\n🎬 Verificando OBS...")
     obs_ok = garantir_obs_aberto()
@@ -404,7 +352,7 @@ def main():
             "OBS não encontrado",
             "Não foi possível localizar ou abrir o OBS.\n\n"
             "Verifique se o OBS está instalado e tente novamente.\n"
-            "Se instalado em caminho diferente, edite a lista OBS_CAMINHOS no script.",
+            "Se instalado em caminho diferente, edite OBS_EXE no script.",
             parent=root_err
         )
         root_err.destroy()
@@ -431,44 +379,39 @@ def main():
     chrome_windows[0].activate()
     time.sleep(1)
 
-    # Tela cheia
     print("🖥️ Fullscreen (F11)...")
     pyautogui.press('f11')
     time.sleep(1)
 
-    # Foco
     print("🖱️ Dando foco...")
     pyautogui.moveTo(largura // 2, altura // 2, duration=0.2)
     pyautogui.click()
-    #Espera para sumir o play da tela....
-    time.sleep(3) 
-    
+    time.sleep(3)
+
     if deve_abortar:
         executar_abort()
-    
-    # Iniciar gravação
+
     print("🔴 Iniciando gravação (Tecla 1)...")
     pydirectinput.press('1')
     time.sleep(1)
-    
+
     gravacao_ativa = True
 
-    # Esperar duração
     print(f"\n⏱️ Gravação ativa! Duração: {tempo_formatado}")
     print(f"   Fim previsto: {time.strftime('%H:%M:%S', time.localtime(time.time() + duracao_segundos))}")
     print(f"   🔥 CTRL+SHIFT+Q para abortar\n")
-    
+
     tempo_decorrido = 0
     intervalo_update = 60
-    
+
     while tempo_decorrido < duracao_segundos:
         if deve_abortar:
             executar_abort()
-            
+
         time.sleep(1)
         tempo_decorrido += 1
         tempo_restante = duracao_segundos - tempo_decorrido
-        
+
         if tempo_restante <= 10 and tempo_restante > 0:
             print(f"   ⏱️ {tempo_restante}s...")
         elif tempo_decorrido % intervalo_update == 0 and tempo_restante > 10:
@@ -480,15 +423,13 @@ def main():
     print(f"\n   ✓ Concluído! {tempo_formatado}")
 
     # ── PONTO CRÍTICO ──────────────────────────────────────────────────────────
-    # Toda a automação (parar OBS, pausar vídeo, sair do fullscreen) deve ser
-    # concluída ANTES de qualquer janela Tk ser criada, pois o Tk pode roubar
-    # o foco do Chrome/player e impedir que os comandos de teclado/mouse funcionem.
+    # Toda a automação deve ser concluída ANTES de qualquer janela Tk ser criada.
     # ──────────────────────────────────────────────────────────────────────────
     parar_gravacao_e_sair_fullscreen()
-    
+    fechar_obs()
+
     gravacao_ativa = False
 
-    # Só AGORA cria a janela de conclusão
     root_fim = Tk()
     root_fim.withdraw()
     root_fim.attributes('-topmost', True)
@@ -508,7 +449,7 @@ def main():
     print("  ✅ Finalizado com sucesso!")
     print("  📁 Verifique sua gravação no OBS.")
     print("="*70)
-    
+
     keyboard.unhook_all()
 
 
