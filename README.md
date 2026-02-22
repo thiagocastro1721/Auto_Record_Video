@@ -21,12 +21,13 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
 ## 💻 Requisitos do Sistema
 
 - **Sistema Operacional:** Windows 11 (desenvolvido e testado)
-- **Teclado Numérico:** Obrigatório (dedicado ou externo)
 - **Software Necessário:**
   - Google Chrome (atualizado)
   - OBS Studio (versão 28 ou superior recomendada)
   - Python 3.8+ com as bibliotecas: `pyautogui`, `pydirectinput`, `pygetwindow`, `keyboard`
 - **Hardware:** Recomenda-se RAM suficiente (8GB+) e processador razoável para gravação fluida
+
+> **💡 Teclado numérico não é mais obrigatório.** O OBS abre automaticamente *depois* que você digita a duração, portanto não há conflito entre o teclado numérico e os atalhos do OBS. Você pode usar qualquer teclado.
 
 ---
 
@@ -80,7 +81,6 @@ Esta configuração garante que o Windows priorize o desempenho do OBS.
 5. Clique no botão **"Procurar"**
 6. Navegue até a pasta de instalação do OBS:
    - Normalmente está em: `C:\Program Files\obs-studio\bin\64bit\obs64.exe`
-   - Ou procure por "OBS Studio" nos arquivos de programas
 7. Selecione o arquivo **`obs64.exe`** e clique em **"Adicionar"**
 8. Com o OBS já listado, clique no botão **"Opções"** ao lado dele
 9. Selecione a opção: **"Alto desempenho"**
@@ -104,238 +104,133 @@ O script precisa que o OBS responda a comandos mesmo quando está em segundo pla
 3. No menu lateral, clique em **"Atalhos de Teclado"**
 4. Localize as seguintes opções e configure:
 
-   | Função | Atalho | Observação |
-   |--------|--------|------------|
-   | **Iniciar Gravação** | Tecla **1** (alfanumérica) | ⚠️ NÃO use o teclado numérico |
-   | **Parar Gravação** | Tecla **2** (alfanumérica) | ⚠️ NÃO use o teclado numérico |
+   | Função | Atalho |
+   |--------|--------|
+   | **Iniciar Gravação** | Tecla **1** (alfanumérica) |
+   | **Parar Gravação** | Tecla **2** (alfanumérica) |
 
 5. Clique em **"Aplicar"** e depois em **"OK"**
+6. **Feche o OBS** após configurar — o script o abrirá automaticamente na hora certa.
 
 **📌 Importante:**
 - Use as teclas **1** e **2** da linha principal do teclado (acima das letras Q, W, E)
 - **NÃO** use o teclado numérico (Numpad) para esses atalhos
-- O teclado numérico será usado apenas para digitar a duração da gravação
-
-**💡 Não tem teclado numérico?**
-Se seu teclado não possui um teclado numérico dedicado:
-- Você precisará editar o código do script para usar outros atalhos
-- Modifique também os atalhos do OBS conforme sua necessidade
-
----
-
-## 🎬 Vídeo Tutorial de Configuração
-
-Se preferir assistir um vídeo explicativo completo sobre todas as configurações acima (Chrome, Windows e OBS), acesse:
-
-**🔗 [Tutorial em Vídeo - Configuração Completa](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
-
-Este vídeo mostra visualmente:
-- ✅ Como desabilitar aceleração gráfica no Chrome
-- ✅ Como configurar alto desempenho gráfico no Windows
-- ✅ Como configurar atalhos globais no OBS Studio
 
 ---
 
 ## 🔧 Gerar Executável (Opcional)
 
-Esta etapa é **opcional**. O script pode ser executado diretamente do:
-- Visual Studio Code
-- Thonny
-- PyCharm ou outra IDE
-- Terminal/CMD com Python
+Esta etapa é **opcional**. O script pode ser executado diretamente do Visual Studio Code, Thonny, PyCharm ou qualquer terminal com Python.
 
 **💡 Por que gerar um executável?**
 - Não precisa abrir IDE toda vez
-- Duplo clique para executar (como qualquer programa)
+- Duplo clique para executar
 - Mais prático para uso frequente
-- Não precisa ter Python visível no sistema
 
 ### Passo a Passo para Criar o Executável
 
 #### 1️⃣ Instalar o PyInstaller
 
-Abra o **Prompt de Comando** (CMD) como Administrador e digite:
-
 ```bash
 pip install pyinstaller
 ```
 
-Aguarde a instalação terminar.
+#### 2️⃣ Gerar o Executável
 
-#### 2️⃣ Verificar se a Instalação foi Bem-sucedida
-
-No mesmo CMD, digite:
+Navegue até a pasta do script no CMD e execute:
 
 ```bash
-pyinstaller --version
+python -m PyInstaller --onefile --noconsole obs_automacao.py
 ```
 
-Deve aparecer algo como: `6.11.1` (ou outra versão)
-
-Se aparecer a versão, a instalação foi bem-sucedida! ✅
-
-#### 3️⃣ Organizar os Arquivos
-
-Crie uma pasta específica para o projeto. Exemplo:
+#### 3️⃣ Localizar o Executável
 
 ```
-C:\Users\[SeuUsuário]\Documentos\Automacao_OBS\
+dist\obs_automacao.exe  ⭐ SEU EXECUTÁVEL AQUI
 ```
 
-Coloque o arquivo `Auto_Record_Video.py` dentro desta pasta.
+#### 4️⃣ Arquivos gerados junto ao executável
 
-#### 4️⃣ Navegar até a Pasta no CMD
-
-No Prompt de Comando, navegue até a pasta criada usando o comando `cd`:
-
-```bash
-cd C:\Users\[SeuUsuário]\Documentos\Automacao_OBS
-```
-
-**💡 Dica:** Você pode copiar o caminho da pasta no Windows Explorer e colar no CMD.
-
-**🖱️ Atalho rápido:**
-- No Windows Explorer, segure `Shift` e clique com botão direito na pasta
-- Escolha "Abrir janela do PowerShell aqui" ou "Abrir no Terminal"
-
-#### 5️⃣ Gerar o Executável
-
-Com o CMD já na pasta correta, execute o comando:
-
-```bash
-python -m PyInstaller --onefile --noconsole Auto_Record_Video.py
-```
-
-**Explicação dos parâmetros:**
-- `--onefile` → Cria um único arquivo `.exe` (mais prático)
-- `--noconsole` → Não abre janela preta do console ao executar
-- `Auto_Record_Video.py` → Nome do seu script
-
-#### 6️⃣ Aguardar a Compilação
-
-O PyInstaller irá:
-- Analisar o script
-- Coletar todas as dependências
-- Criar o executável
-
-Isso pode levar de 30 segundos a 2 minutos dependendo do seu computador.
-
-#### 7️⃣ Localizar o Executável
-
-Após a conclusão, o executável estará em:
-
-```
-C:\Users\[SeuUsuário]\Documentos\Automacao_OBS\dist\Auto_Record_Video.exe
-```
-
-**📂 Estrutura de pastas criada:**
-```
-Automacao_OBS/
-├── Auto_Record_Video.py          (script original)
-├── Auto_Record_Video.spec        (arquivo de configuração)
-├── build/                              (pasta temporária)
-└── dist/
-    └── Auto_Record_Video.exe     ⭐ SEU EXECUTÁVEL AQUI!
-```
-
-#### 8️⃣ Usar o Executável
-
-Agora você pode:
-
-✅ Copiar o arquivo `.exe` da pasta `dist` para onde quiser
-✅ Criar um atalho na Área de Trabalho
-✅ Executar com duplo clique
-✅ O executável é **portátil** (pode copiar para outro PC Windows)
-
-**⚠️ Importante:**
-- O executável gerado funciona **apenas no Windows**
-- Antivírus podem dar falso positivo (é normal com PyInstaller)
-- Se o antivírus bloquear, adicione uma exceção
+O script cria automaticamente um arquivo `obs_automacao_config.json` na mesma pasta do `.exe` para salvar suas preferências (ex: clique duplo para pausar). Mantenha esse arquivo junto ao executável.
 
 ### 🎨 Adicionar Ícone Personalizado (Opcional)
 
-Se quiser um ícone personalizado no executável:
-
-1. Obtenha um arquivo `.ico` (ícone)
-2. Coloque-o na mesma pasta do script
-3. Use o comando:
-
 ```bash
-python -m PyInstaller --onefile --noconsole --icon=icone.ico Auto_Record_Video.py
+python -m PyInstaller --onefile --noconsole --icon=icone.ico obs_automacao.py
 ```
-
-### 🔄 Recompilar Após Mudanças
-
-Se você modificar o script:
-
-1. Delete as pastas `build` e `dist`
-2. Execute o comando do PyInstaller novamente
-3. Um novo executável será gerado com as mudanças
 
 ### 🚨 Solução de Problemas - PyInstaller
 
-**Problema: "pyinstaller não é reconhecido como comando"**
-
-Solução:
+**Executável não abre / fecha imediatamente** — remova `--noconsole` para ver os erros:
 ```bash
-python -m pip install --upgrade pyinstaller
+python -m PyInstaller --onefile obs_automacao.py
 ```
 
-**Problema: Executável não abre / fecha imediatamente**
-
-Solução:
-- Remova `--noconsole` para ver os erros:
-```bash
-python -m PyInstaller --onefile Auto_Record_Video.py
-```
-- Execute o `.exe` pelo CMD para ver mensagens de erro
-
-**Problema: Antivírus bloqueia o executável**
-
-Solução:
-- É um falso positivo comum com PyInstaller
-- Adicione exceção no antivírus
-- Ou assine digitalmente o executável (avançado)
+**Antivírus bloqueia** — é falso positivo comum com PyInstaller. Adicione exceção no antivírus.
 
 ---
 
 ## 🚀 Como Usar o Script
 
+### Fluxo de execução
+
+```
+Iniciar script
+    ↓
+Ler instruções → OK
+    ↓
+Digitar duração + opções → Confirmar
+    ↓
+OBS abre automaticamente (se não estiver aberto)
+    ↓
+Chrome ativa → Tela cheia → Gravação inicia
+    ↓
+[aguarda duração configurada]
+    ↓
+Gravação para → Vídeo pausa → Sai do fullscreen → OBS fecha
+    ↓
+Mensagem de conclusão
+```
+
+### ⚠️ Sobre o OBS antes de iniciar
+
+| Situação | O que acontece |
+|----------|---------------|
+| **OBS fechado** ✅ | O script abre automaticamente após você digitar a duração. Sem conflitos. |
+| **OBS já aberto** ⚠️ | O script detecta e usa o OBS existente, mas **os atalhos do OBS (teclas 1 e 2) ficam ativos enquanto você digita a duração**, podendo iniciar/parar gravação acidentalmente. |
+
+**Recomendação:** deixe o OBS fechado antes de iniciar o script. Ele será aberto automaticamente no momento correto.
+
 ### Preparação Antes de Executar
 
-**Antes de iniciar o script, certifique-se de que:**
-
-1. ✅ O **OBS Studio** está aberto e configurado
-2. ✅ O **Google Chrome** está aberto com o vídeo já carregado na aba
-3. ✅ O vídeo está **pausado** e pronto para começar
-4. ✅ Você tem **tempo livre** - não mexa no computador durante a gravação
-5. ✅ O **Num Lock** está ativado (luz acesa no teclado)
+1. ✅ **OBS fechado** (será aberto automaticamente)
+2. ✅ **Google Chrome** aberto com o vídeo carregado e pausado
+3. ✅ Você tem **tempo livre** — não mexa no computador durante a gravação
 
 ### Executando o Script
 
-1. Execute o arquivo Python: `python Auto_Record_Video.py`
+1. Execute: `python obs_automacao.py` (ou o `.exe`)
 
 2. **Primeira janela:** Leia as instruções e clique em **"OK"**
 
-3. **Segunda janela - Duração:**
-   - Digite a duração desejada nos três campos:
-     - **Horas** (0 a 999)
-     - **Minutos** (0 a 59)
-     - **Segundos** (0 a 59)
-   - Use o **teclado numérico** para digitar
+3. **Segunda janela — Duração:**
+   - Digite horas, minutos e segundos
+   - Marque ou desmarque **"Clique duplo para pausar"** conforme seu player:
+     - ✅ **Marcado** (padrão): recomendado para YouTube — o 1º clique fecha o painel de recomendações e o 2º pausa
+     - ☐ **Desmarcado**: para players que pausam com um único clique
+   - Esta preferência é **salva automaticamente** para a próxima execução
    - Pressione **Enter** ou clique em **"✓ Confirmar"**
 
-4. **Automação em ação:**
-   - Aguarde 3 segundos (contagem regressiva aparecerá no console)
-   - O Chrome será ativado e entrará em tela cheia
-   - A gravação do OBS iniciará automaticamente
-   - O script aguardará o tempo configurado
-   - A gravação será finalizada automaticamente
+4. **Automação em ação** (não toque no mouse/teclado):
+   - OBS abre e inicializa (~10 segundos)
+   - Chrome entra em tela cheia
+   - Gravação inicia automaticamente
+   - Script aguarda o tempo configurado
+   - Gravação finaliza, vídeo pausa, OBS fecha
 
 5. **Finalização:**
-   - O Chrome sairá do modo tela cheia
-   - Uma janela informará que a gravação foi concluída
-   - O vídeo estará salvo na pasta de gravações do OBS
+   - Uma janela confirma que a gravação foi concluída
+   - O vídeo está salvo na pasta de gravações do OBS
 
 ### 📁 Onde encontrar o vídeo gravado?
 
@@ -358,101 +253,77 @@ Você pode verificar/alterar em: **OBS** → **Configurações** → **Saída** 
 
 ### 🛑 Como Abortar a Gravação
 
-Se precisar **interromper a gravação antes do tempo acabar**:
-
-1. Pressione **Ctrl + Shift + Q** a qualquer momento
-2. O script irá:
-   - Parar a gravação do OBS
-   - Sair do modo tela cheia
-   - Salvar o vídeo parcial
-   - Mostrar uma mensagem de confirmação
-
-**💾 O vídeo parcial é salvo?** Sim! Tudo que foi gravado até o momento ficará salvo.
+Pressione **Ctrl + Shift + Q** a qualquer momento. O script irá parar a gravação do OBS, sair do modo tela cheia, salvar o vídeo parcial e mostrar uma mensagem de confirmação.
 
 ---
 
 ## 🔧 Solução de Problemas
 
+### ❌ Problema: Gravação iniciou sozinha ao digitar a duração
+
+**Causa:** O OBS estava aberto antes de iniciar o script, e os atalhos (teclas 1 e 2) ficaram ativos durante a digitação.
+
+**Solução:** Feche o OBS antes de iniciar o script. Ele abrirá automaticamente no momento certo.
+
 ### ❌ Problema: "Chrome não encontrado"
 
-**Solução:**
-- Certifique-se de que o Chrome está aberto
-- Verifique se há "Chrome" no título da janela
-- Tente renomear a janela do navegador
+**Solução:** Certifique-se de que o Chrome está aberto com uma aba ativa.
 
 ### ❌ Problema: Gravação não inicia no OBS
 
 **Soluções:**
-1. Verifique se os atalhos estão configurados corretamente (tecla **1** para iniciar)
-2. Teste manualmente: pressione a tecla **1** com o OBS aberto
-3. Certifique-se de que são atalhos **globais** (funcionam mesmo com OBS em segundo plano)
+1. Verifique se os atalhos estão configurados (tecla **1** para iniciar, **2** para parar)
+2. Confirme que são atalhos **globais**
+3. Teste manualmente: pressione a tecla **1** com o OBS aberto
 
 ### ❌ Problema: Tela preta na gravação
 
 **Soluções:**
-1. Desabilite a aceleração gráfica do Chrome (veja [seção específica](#-configuração-obrigatória-do-google-chrome))
-2. Configure o Chrome como fonte de captura no OBS
-3. Use "Captura de Janela" em vez de "Captura de Tela" no OBS
+1. Desabilite a aceleração gráfica do Chrome
+2. Use "Captura de Janela" em vez de "Captura de Tela" no OBS
 
-### ❌ Problema: Gravação travando/cortando
+### ❌ Problema: Gravação com segundos a mais ou a menos
 
-**Soluções:**
-1. Feche outros programas pesados
-2. Configure o OBS para usar menos recursos:
-   - Diminua a resolução de saída
-   - Use codec x264 (mais leve que NVENC em alguns casos)
-3. Verifique se o Windows está configurado para "Alto desempenho" para o OBS
-
-### ❌ Problema: Não consigo digitar a duração
-
-**Solução:**
-- Verifique se o **Num Lock** está ativado (luz acesa)
-- Use o teclado numérico (não as teclas numéricas da linha superior)
-- Se não tiver teclado numérico, você precisará editar o código
+**Solução:** Ajuste a constante `OVERHEAD_FINALIZACAO` no script. Aumente se gravar a mais, diminua se gravar a menos.
 
 ### ❌ Problema: Ctrl + Shift + Q não funciona
 
 **Soluções:**
 1. Execute o script como **Administrador**
 2. Verifique se outro programa não está usando esse atalho
-3. Tente pressionar as três teclas **simultaneamente e segurar** por 1 segundo
 
 ---
 
 ## 📊 Dicas de Otimização
 
-### Para Melhor Desempenho:
-
 1. **Feche programas desnecessários** antes de gravar
-2. **Desative atualizações automáticas** temporariamente
-3. **Use modo "Alto desempenho"** nas configurações de energia do Windows
-4. **Tenha espaço em disco suficiente** (pelo menos 10GB livres)
-5. **Conecte o notebook na tomada** (não use bateria)
+2. **Use modo "Alto desempenho"** nas configurações de energia do Windows
+3. **Tenha espaço em disco suficiente** (pelo menos 10GB livres)
+4. **Conecte o notebook na tomada** (não use bateria)
 
 ### Configurações Recomendadas do OBS:
 
-- **Taxa de bits:** 2500-6000 kbps (dependendo da qualidade desejada)
-- **Encoder:** x264 ou NVENC (se tiver GPU Nvidia)
-- **Taxa de quadros:** 30 fps (ou 60 fps para jogos)
-- **Resolução:** 1920x1080 (Full HD)
+- **Taxa de bits:** 2500–6000 kbps
+- **Encoder:** x264 ou NVENC (GPU Nvidia)
+- **Taxa de quadros:** 30 fps
+- **Resolução:** 1920×1080
 
 ---
 
 ## 📝 Notas Finais
 
-- ⚠️ **Não mexa no mouse/teclado** durante a execução do script
-- ⚠️ O script assumirá controle do mouse e teclado automaticamente
+- ⚠️ **Não mexa no mouse/teclado** após confirmar a duração
 - ⚠️ Planeje antecipadamente: calcule a duração correta do vídeo
-- ✅ Teste primeiro com vídeos curtos (1-2 minutos) para garantir que tudo funciona
+- ✅ Teste primeiro com vídeos curtos (20–30 segundos) para calibrar o tempo
 
 ---
 
 ## 📞 Suporte
 
 Se encontrar problemas não listados aqui:
-1. Revise **todas as configurações** acima cuidadosamente
+1. Revise todas as configurações acima
 2. Teste os atalhos do OBS manualmente
-3. Verifique os logs do console do Python para mensagens de erro
+3. Verifique o console do Python para mensagens de erro
 
 ---
 
@@ -462,4 +333,5 @@ Este script é fornecido "como está", para uso pessoal e educacional.
 
 ---
 
-**Desenvolvido para Windows 11** | Última atualização: 2025
+**Desenvolvido para Windows 11** | Última atualização: 2026
+
