@@ -1,24 +1,24 @@
-# 🎥 Automação de Gravação OBS com Chrome
+# Automação de Gravação OBS com Chrome
 
 Este script automatiza a gravação em **tela cheia** de vídeos executados no **Google Chrome**, utilizando o **OBS Studio** em segundo plano, sem necessidade de interação manual durante o processo.
 
 ---
 
-## 📋 Índice
+## Índice
 
-1. [Requisitos do Sistema](#-requisitos-do-sistema)
-2. [Vídeo Tutorial de Configuração](#-vídeo-tutorial-de-configuração)
-3. [Configuração do Google Chrome](#-configuração-obrigatória-do-google-chrome)
-4. [Configuração do Windows](#-configuração-obrigatória-do-windows)
-5. [Configuração do OBS Studio](#configuração-obrigatória-do-obs-studio)
-6. [Gerar Executável (Opcional)](#-gerar-executável-opcional)
-7. [Como Usar](#-como-usar-o-script)
-8. [Atalhos de Teclado](#%EF%B8%8F-atalhos-de-teclado)
-9. [Solução de Problemas](#-solução-de-problemas)
+1. [Requisitos do Sistema](#requisitos-do-sistema)
+2. [Vídeo Tutorial de Configuração](#vídeo-tutorial-de-configuração)
+3. [Configuração do Google Chrome](#configuração-do-google-chrome)
+4. [Configuração do Windows](#configuração-do-windows)
+5. [Configuração do OBS Studio](#configuração-do-obs-studio)
+6. [Gerar Executável (Opcional)](#gerar-executável-opcional)
+7. [Como Usar](#como-usar-o-script)
+8. [Atalhos de Teclado](#atalhos-de-teclado)
+9. [Solução de Problemas](#solução-de-problemas)
 
 ---
 
-## 💻 Requisitos do Sistema
+## Requisitos do Sistema
 
 - **Sistema Operacional:** Windows 11 (desenvolvido e testado)
 - **Software Necessário:**
@@ -31,9 +31,9 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
 
 ---
 
-## 🎬 Vídeo Tutorial de Configuração
+## Vídeo Tutorial de Configuração
 
-Se preferir assistir um vídeo explicativo sobre as configurações abaixo (Chrome, Windows), acesse:
+Se preferir assistir um vídeo explicativo sobre as configurações de Chrome e Windows, acesse:
 
 **🔗 [Tutorial em Vídeo - Configuração Completa](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
 
@@ -43,7 +43,9 @@ Este vídeo mostra visualmente:
 
 ---
 
-## 🌐 Configuração Obrigatória do Google Chrome (Disponível no Vídeo Tutorial de Configuração)
+## Configuração do Google Chrome
+
+> ✅ Disponível no Vídeo Tutorial de Configuração
 
 ### ⚠️ Desabilitar Aceleração Gráfica
 
@@ -65,7 +67,9 @@ A aceleração gráfica pode causar conflitos com a captura de tela do OBS, resu
 
 ---
 
-## 🪟 Configuração Obrigatória do Windows (Disponível no Vídeo Tutorial de Configuração)
+## Configuração do Windows
+
+> ✅ Disponível no Vídeo Tutorial de Configuração
 
 ### ⚙️ Configurar OBS para Alto Desempenho Gráfico
 
@@ -90,9 +94,11 @@ Garante que a GPU dedicada (se disponível) seja usada pelo OBS, melhorando dras
 
 ---
 
-## Configuração Obrigatória do OBS Studio (Não disponível no Vídeo Tutorial de Configuração)
+## Configuração do OBS Studio
 
-### ⌨️ Configurar Atalhos Globais
+> ⚠️ Não disponível no Vídeo Tutorial de Configuração — siga os passos abaixo
+
+### Configurar Atalhos Globais
 
 O script precisa que o OBS responda a comandos mesmo quando está em segundo plano.
 
@@ -117,7 +123,7 @@ O script precisa que o OBS responda a comandos mesmo quando está em segundo pla
 
 ---
 
-## 🔧 Gerar Executável (Opcional)
+## Gerar Executável (Opcional)
 
 Esta etapa é **opcional**. O script pode ser executado diretamente do Visual Studio Code, Thonny, PyCharm ou qualquer terminal com Python.
 
@@ -128,13 +134,13 @@ Esta etapa é **opcional**. O script pode ser executado diretamente do Visual St
 
 ### Passo a Passo para Criar o Executável
 
-#### 1️⃣ Instalar o PyInstaller
+#### 1. Instalar o PyInstaller
 
 ```bash
 pip install pyinstaller
 ```
 
-#### 2️⃣ Gerar o Executável
+#### 2. Gerar o Executável
 
 Navegue até a pasta do script no CMD e execute:
 
@@ -142,23 +148,23 @@ Navegue até a pasta do script no CMD e execute:
 python -m PyInstaller --onefile --noconsole Auto_Record_Video.py
 ```
 
-#### 3️⃣ Localizar o Executável
+#### 3. Localizar o Executável
 
 ```
 dist\Auto_Record_Video.exe  ⭐ SEU EXECUTÁVEL AQUI
 ```
 
-#### 4️⃣ Arquivos gerados junto ao executável
+#### 4. Arquivos gerados junto ao executável
 
 O script cria automaticamente um arquivo `Auto_Record_Video_config.json` na mesma pasta do `.exe` para salvar suas preferências (ex: clique duplo para pausar). Mantenha esse arquivo junto ao executável.
 
-### 🎨 Adicionar Ícone Personalizado (Opcional)
+### Adicionar Ícone Personalizado (Opcional)
 
 ```bash
 python -m PyInstaller --onefile --noconsole --icon=icone.ico Auto_Record_Video.py
 ```
 
-### 🚨 Solução de Problemas - PyInstaller
+### Solução de Problemas com PyInstaller
 
 **Executável não abre / fecha imediatamente** — remova `--noconsole` para ver os erros:
 ```bash
@@ -169,7 +175,7 @@ python -m PyInstaller --onefile Auto_Record_Video.py
 
 ---
 
-## 🚀 Como Usar o Script
+## Como Usar o Script
 
 ### Fluxo de execução
 
@@ -191,7 +197,7 @@ Gravação para → Vídeo pausa → Sai do fullscreen → OBS fecha
 Mensagem de conclusão
 ```
 
-### ⚠️ Sobre o OBS antes de iniciar
+### Sobre o OBS antes de iniciar
 
 | Situação | O que acontece |
 |----------|---------------|
@@ -231,7 +237,7 @@ Mensagem de conclusão
    - Uma janela confirma que a gravação foi concluída
    - O vídeo está salvo na pasta de gravações do OBS
 
-### 📁 Onde encontrar o vídeo gravado?
+### Onde encontrar o vídeo gravado?
 
 Por padrão, o OBS salva em:
 ```
@@ -242,50 +248,50 @@ Você pode verificar/alterar em: **OBS** → **Configurações** → **Saída** 
 
 ---
 
-## ⌨️ Atalhos de Teclado
+## Atalhos de Teclado
 
 | Atalho | Função | Quando usar |
 |--------|--------|-------------|
-| **Ctrl + Shift + Q** | ⏹️ Abortar gravação | Durante a gravação, para parar antecipadamente |
-| **Enter** | ✅ Confirmar duração | Na janela de configuração de tempo |
-| **Esc** | ❌ Cancelar | Na janela de configuração de tempo |
+| **Ctrl + Shift + Q** | Abortar gravação | Durante a gravação, para parar antecipadamente |
+| **Enter** | Confirmar duração | Na janela de configuração de tempo |
+| **Esc** | Cancelar | Na janela de configuração de tempo |
 
-### 🛑 Como Abortar a Gravação
+### Como Abortar a Gravação
 
 Pressione **Ctrl + Shift + Q** a qualquer momento. O script irá parar a gravação do OBS, sair do modo tela cheia, salvar o vídeo parcial e mostrar uma mensagem de confirmação.
 
 ---
 
-## 🔧 Solução de Problemas
+## Solução de Problemas
 
-### ❌ Problema: Gravação iniciou sozinha ao digitar a duração
+### Problema: Gravação iniciou sozinha ao digitar a duração
 
 **Causa:** O OBS estava aberto antes de iniciar o script, e os atalhos (teclas 1 e 2) ficaram ativos durante a digitação.
 
 **Solução:** Feche o OBS antes de iniciar o script. Ele abrirá automaticamente no momento certo.
 
-### ❌ Problema: "Chrome não encontrado"
+### Problema: "Chrome não encontrado"
 
 **Solução:** Certifique-se de que o Chrome está aberto com uma aba ativa.
 
-### ❌ Problema: Gravação não inicia no OBS
+### Problema: Gravação não inicia no OBS
 
 **Soluções:**
 1. Verifique se os atalhos estão configurados (tecla **1** para iniciar, **2** para parar)
 2. Confirme que são atalhos **globais**
 3. Teste manualmente: pressione a tecla **1** com o OBS aberto
 
-### ❌ Problema: Tela preta na gravação
+### Problema: Tela preta na gravação
 
 **Soluções:**
 1. Desabilite a aceleração gráfica do Chrome
 2. Use "Captura de Janela" em vez de "Captura de Tela" no OBS
 
-### ❌ Problema: Gravação com segundos a mais ou a menos
+### Problema: Gravação com segundos a mais ou a menos
 
 **Solução:** Ajuste a constante `OVERHEAD_FINALIZACAO` no script. Aumente se gravar a mais, diminua se gravar a menos.
 
-### ❌ Problema: Ctrl + Shift + Q não funciona
+### Problema: Ctrl + Shift + Q não funciona
 
 **Soluções:**
 1. Execute o script como **Administrador**
@@ -293,14 +299,14 @@ Pressione **Ctrl + Shift + Q** a qualquer momento. O script irá parar a gravaç
 
 ---
 
-## 📊 Dicas de Otimização
+## Dicas de Otimização
 
 1. **Feche programas desnecessários** antes de gravar
 2. **Use modo "Alto desempenho"** nas configurações de energia do Windows
 3. **Tenha espaço em disco suficiente** (pelo menos 10GB livres)
 4. **Conecte o notebook na tomada** (não use bateria)
 
-### Configurações Recomendadas do OBS:
+### Configurações Recomendadas do OBS
 
 - **Taxa de bits:** 2500–6000 kbps
 - **Encoder:** x264 ou NVENC (GPU Nvidia)
@@ -309,7 +315,7 @@ Pressione **Ctrl + Shift + Q** a qualquer momento. O script irá parar a gravaç
 
 ---
 
-## 📝 Notas Finais
+## Notas Finais
 
 - ⚠️ **Não mexa no mouse/teclado** após confirmar a duração
 - ⚠️ Planeje antecipadamente: calcule a duração correta do vídeo
@@ -317,7 +323,7 @@ Pressione **Ctrl + Shift + Q** a qualquer momento. O script irá parar a gravaç
 
 ---
 
-## 📞 Suporte
+## Suporte
 
 Se encontrar problemas não listados aqui:
 1. Revise todas as configurações acima
@@ -326,7 +332,7 @@ Se encontrar problemas não listados aqui:
 
 ---
 
-## 📜 Licença
+## Licença
 
 Este script é fornecido "como está", para uso pessoal e educacional.
 
