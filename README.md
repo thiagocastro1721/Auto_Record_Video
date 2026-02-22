@@ -91,7 +91,7 @@ Garante que a GPU dedicada (se disponível) seja usada pelo OBS, melhorando dras
 
 ---
 
-## 🎙️ Configuração Obrigatória do OBS Studio
+## ⌨️ Configuração Obrigatória do OBS Studio
 
 ### ⌨️ Configurar Atalhos Globais
 
