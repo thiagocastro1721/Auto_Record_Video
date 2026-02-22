@@ -10,7 +10,7 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
 2. [Vídeo Tutorial de Configuração](#-vídeo-tutorial-de-configuração)
 3. [Configuração do Google Chrome](#-configuração-obrigatória-do-google-chrome)
 4. [Configuração do Windows](#-configuração-obrigatória-do-windows)
-5. [Configuração do OBS Studio](#-configuração-obrigatória-do-obs-studio)
+5. [Configuração do OBS Studio](#configuração-obrigatória-do-obs-studio)
 6. [Gerar Executável (Opcional)](#-gerar-executável-opcional)
 7. [Como Usar](#-como-usar-o-script)
 8. [Atalhos de Teclado](#%EF%B8%8F-atalhos-de-teclado)
@@ -91,7 +91,7 @@ Garante que a GPU dedicada (se disponível) seja usada pelo OBS, melhorando dras
 
 ---
 
-## ⌨️ Configuração Obrigatória do OBS Studio
+## Configuração Obrigatória do OBS Studio
 
 ### ⌨️ Configurar Atalhos Globais
 
