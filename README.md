@@ -33,14 +33,13 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
 
 ## 🎬 Vídeo Tutorial de Configuração
 
-Se preferir assistir um vídeo explicativo completo sobre todas as configurações abaixo (Chrome, Windows e OBS), acesse:
+Se preferir assistir um vídeo explicativo sobre as configurações abaixo (Chrome, Windows), acesse:
 
 **🔗 [Tutorial em Vídeo - Configuração Completa](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
 
 Este vídeo mostra visualmente:
 - ✅ Como desabilitar aceleração gráfica no Chrome
 - ✅ Como configurar alto desempenho gráfico no Windows
-- ✅ Como configurar atalhos globais no OBS Studio
 
 ---
 
