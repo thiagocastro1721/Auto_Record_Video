@@ -9,12 +9,13 @@ import pyautogui
 import pydirectinput
 import time
 import pygetwindow as gw
-from tkinter import Tk, Label, Entry, Button, messagebox, Frame
+from tkinter import Tk, Label, Entry, Button, messagebox, Frame, BooleanVar, Checkbutton
 import keyboard
 import sys
 import subprocess
 import os
 import ctypes
+import json
 
 # Variáveis globais
 largura, altura = pyautogui.size()
@@ -24,6 +25,25 @@ deve_abortar = False
 # ── CONFIGURAÇÃO OBS ──────────────────────────────────────────────────────────
 OBS_EXE = r"C:\Program Files\obs-studio\bin\64bit\obs64.exe"
 OBS_CWD = r"C:\Program Files\obs-studio\bin\64bit"  # obrigatório: OBS busca en-US.ini aqui
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── PERSISTÊNCIA ──────────────────────────────────────────────────────────────
+_BASE_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+CONFIG_FILE = os.path.join(_BASE_DIR, "obs_automacao_config.json")
+
+def carregar_config():
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            return {**{"clique_duplo_pausa": True}, **json.load(f)}
+    except Exception:
+        return {"clique_duplo_pausa": True}
+
+def salvar_config(config: dict):
+    try:
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"⚠️ Não foi possível salvar configurações: {e}")
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _rodar_comando_oculto(args):
@@ -65,8 +85,6 @@ def garantir_obs_aberto():
         return False
 
     try:
-        # SW_SHOWNORMAL garante que a janela aparece visível ao usuário,
-        # independente de como o processo pai foi iniciado (VS Code, .exe, etc.)
         si = subprocess.STARTUPINFO()
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         si.wShowWindow = 1  # SW_SHOWNORMAL
@@ -87,7 +105,7 @@ def garantir_obs_aberto():
         print(".", end="", flush=True)
         if obs_processo_rodando():
             print(" ✓")
-            time.sleep(3)  # OBS demora ~7s para registrar hotkeys globais
+            time.sleep(3)
             return True
 
     print(" ✗ Timeout — OBS não iniciou em 30s")
@@ -103,34 +121,34 @@ def fechar_obs():
     else:
         print("   ⚠️ OBS ainda em execução — encerre manualmente se necessário.")
 
-def parar_gravacao_e_sair_fullscreen():
+def parar_gravacao_e_sair_fullscreen(clique_duplo_pausa=True):
     """
-    Sequência de fim de gravação:
-    1. Para a gravação do OBS (tecla 2)
-    2. Pausa o vídeo (clique) 
-    3. Sai do fullscreen (F11)
-    Esta ordem evita segundos extras gravados enquanto a UI do OBS responde.
+    Sequência de fim de gravação.
+    clique_duplo_pausa=True: dois cliques (recomendado para YouTube/players com
+                             painel de recomendações que aparece ao pausar).
+    clique_duplo_pausa=False: um único clique para pausar.
     """
-    
+
     # 1. Parar gravação OBS
     print("⏹️ Parando gravação OBS (Tecla 2)...")
     pydirectinput.press('2')
-    time.sleep(1.5)  # Aguarda OBS finalizar o arquivo
-    
-    # 2. Reativar Chrome e pausar o vídeo IMEDIATAMENTE
-    # O vídeo é pausado primeiro para não gravar frames extras
-    print("🌐 Re-ativando janela do Chrome...")
-    chrome_windows = gw.getWindowsWithTitle("Chrome")
-    if chrome_windows:
-        chrome_windows[0].activate()
-        time.sleep(0.5)
+    time.sleep(1.5)
 
-    print("🖱️ Pausando vídeo (clique no centro)...")
+    print("🖱️ Pausando vídeo...")
     pyautogui.moveTo(largura // 2, altura // 2, duration=0.2)
-    pyautogui.click()
-    time.sleep(0.5)
 
-    # 3. Sair do fullscreen
+    if clique_duplo_pausa:
+        # 1º clique: fecha painel de recomendações
+        pyautogui.click()
+        time.sleep(1)
+        # 2º clique: pausa o vídeo
+        pyautogui.click()
+        print("   (clique duplo ativado)")
+    else:
+        pyautogui.click()
+        print("   (clique simples)")
+
+    # 2. Sair do fullscreen
     print("🖥️ Saindo do fullscreen (F11)...")
     pyautogui.press('f11')
     time.sleep(1.0)
@@ -166,7 +184,6 @@ def executar_abort():
     gravacao_ativa = False
     fechar_obs()
 
-    # Mostrar popup — só cria o Tk DEPOIS de toda automação terminar
     root = Tk()
     root.withdraw()
     root.attributes('-topmost', True)
@@ -187,9 +204,10 @@ def executar_abort():
     sys.exit(0)
 
 def obter_duracao():
-    """Cria janela customizada com 3 campos: horas, minutos, segundos"""
+    """Cria janela customizada com 3 campos: horas, minutos, segundos + opção de pausa."""
 
-    resultado = {'duracao': None}
+    config = carregar_config()
+    resultado = {'duracao': None, 'clique_duplo_pausa': config['clique_duplo_pausa']}
 
     def confirmar():
         try:
@@ -223,6 +241,9 @@ def obter_duracao():
                     return
 
             resultado['duracao'] = total_segundos
+            resultado['clique_duplo_pausa'] = var_clique_duplo.get()
+            salvar_config({'clique_duplo_pausa': resultado['clique_duplo_pausa']})
+
             janela.quit()
             janela.destroy()
 
@@ -235,7 +256,7 @@ def obter_duracao():
 
     janela = Tk()
     janela.title("⏱️ Duração da Gravação")
-    janela.geometry("420x270")
+    janela.geometry("420x310")  # altura aumentada para o checkbox
     janela.resizable(False, False)
     janela.attributes('-topmost', True)
     janela.lift()
@@ -243,8 +264,8 @@ def obter_duracao():
 
     janela.update_idletasks()
     x = (janela.winfo_screenwidth() // 2) - (420 // 2)
-    y = (janela.winfo_screenheight() // 2) - (270 // 2)
-    janela.geometry(f"420x270+{x}+{y}")
+    y = (janela.winfo_screenheight() // 2) - (310 // 2)
+    janela.geometry(f"420x310+{x}+{y}")
     janela.update()
     janela.deiconify()
 
@@ -252,7 +273,7 @@ def obter_duracao():
           font=("Arial", 12, "bold")).pack(pady=15)
 
     frame_campos = Frame(janela)
-    frame_campos.pack(pady=20)
+    frame_campos.pack(pady=10)
 
     frame_horas = Frame(frame_campos)
     frame_horas.grid(row=0, column=0, padx=10)
@@ -276,7 +297,17 @@ def obter_duracao():
     entry_segundos.insert(0, "0")
 
     Label(janela, text="💡 Use o teclado numérico",
-          font=("Arial", 9), fg="gray").pack(pady=10)
+          font=("Arial", 9), fg="gray").pack(pady=5)
+
+    # ── CHECKBOX persistente ──────────────────────────────────────────────────
+    var_clique_duplo = BooleanVar(value=config['clique_duplo_pausa'])
+    Checkbutton(
+        janela,
+        text="Clique duplo para pausar (Painel de recomendações)",
+        variable=var_clique_duplo,
+        font=("Arial", 9),
+    ).pack(pady=5)
+    # ─────────────────────────────────────────────────────────────────────────
 
     frame_botoes = Frame(janela)
     frame_botoes.pack(pady=15)
@@ -296,7 +327,7 @@ def obter_duracao():
     janela.protocol("WM_DELETE_WINDOW", cancelar)
     janela.mainloop()
 
-    return resultado['duracao']
+    return resultado
 
 def main():
     global gravacao_ativa, deve_abortar
@@ -313,25 +344,33 @@ def main():
     messagebox.showinfo(
         "Automação OBS - Global Hotkeys",
         "Certifique-se de que:\n\n"
-        "✓ Teclado numérico com Num Lock ativado\n"
         "✓ Atalhos do OBS são GLOBAIS:\n"
         "   • Tecla 1 = Iniciar gravação\n"
         "   • Tecla 2 = Parar gravação\n"
         "✓ Player de vídeo aberto no Chrome\n\n"
-        "ℹ️  O OBS será aberto automaticamente se necessário\n\n"
-        "⚠️ NÃO mexa no mouse/teclado depois\n"
-        "⚠️ CTRL+SHIFT+Q para ABORTAR\n\n"
+        "ℹ️  O OBS será aberto automaticamente após\n"
+        "   você digitar a duração — não é necessário\n"
+        "   abri-lo antes.\n\n"
+        "⚠️  Se o OBS já estiver aberto, feche-o antes\n"
+        "   de digitar a duração para evitar conflito\n"
+        "   com o teclado numérico.\n\n"
+        "⚠️  NÃO mexa no mouse/teclado após confirmar\n"
+        "⚠️  CTRL+SHIFT+Q para ABORTAR\n\n"
         "Clique OK para continuar...",
         parent=root_msg
     )
 
     root_msg.destroy()
 
-    duracao_segundos = obter_duracao()
+    # obter_duracao agora retorna dict com 'duracao' e 'clique_duplo_pausa'
+    resultado = obter_duracao()
 
-    if duracao_segundos is None:
+    if resultado['duracao'] is None:
         keyboard.unhook_all()
         return
+
+    duracao_segundos = resultado['duracao']
+    clique_duplo_pausa = resultado['clique_duplo_pausa']
 
     horas = duracao_segundos // 3600
     minutos = (duracao_segundos % 3600) // 60
@@ -340,12 +379,10 @@ def main():
 
     print(f"\n{'='*70}")
     print(f"  Duração configurada: {tempo_formatado} ({duracao_segundos} segundos)")
+    print(f"  Clique duplo para pausar: {'Sim' if clique_duplo_pausa else 'Não'}")
     print(f"  🔥 CTRL+SHIFT+Q para abortar a qualquer momento")
     print(f"{'='*70}\n")
 
-    # ── VERIFICAR / ABRIR OBS ─────────────────────────────────────────────────
-    # Feito ANTES de mexer no Chrome para não perder o foco do navegador depois.
-    # ─────────────────────────────────────────────────────────────────────────
     print("\n🎬 Verificando OBS...")
     obs_ok = garantir_obs_aberto()
     if not obs_ok:
@@ -363,7 +400,6 @@ def main():
         keyboard.unhook_all()
         return
 
-    # Aguardar 3 segundos
     print("Aguardando 3 segundos...")
     for i in range(3, 0, -1):
         if deve_abortar:
@@ -371,7 +407,6 @@ def main():
         print(f"  {i}...")
         time.sleep(1)
 
-    # Ativar Chrome
     print("\n🌐 Procurando Chrome...")
     chrome_windows = gw.getWindowsWithTitle("Chrome")
     if not chrome_windows:
@@ -401,9 +436,6 @@ def main():
 
     gravacao_ativa = True
 
-    # OVERHEAD_FINALIZACAO: tempo real gasto pela sequência de parada
-    # (ativar chrome + clicar + parar OBS + F11) — descontado do timer
-    # para que a gravação termine exatamente na duração configurada.
     OVERHEAD_FINALIZACAO = 1  # segundos — ajuste se ainda sobrar/faltar
 
     print(f"\n⏱️ Gravação ativa! Duração: {tempo_formatado}")
@@ -437,11 +469,9 @@ def main():
 
     print(f"\n   ✓ Concluído! {tempo_formatado}")
 
-    # ── PONTO CRÍTICO ──────────────────────────────────────────────────────────
-    # Toda a automação deve ser concluída ANTES de qualquer janela Tk ser criada.
-    # ──────────────────────────────────────────────────────────────────────────
-    parar_gravacao_e_sair_fullscreen()
+    parar_gravacao_e_sair_fullscreen(clique_duplo_pausa)
     fechar_obs()
+    time.sleep(3)
 
     gravacao_ativa = False
 
