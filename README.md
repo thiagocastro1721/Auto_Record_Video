@@ -43,7 +43,7 @@ Este vídeo mostra visualmente:
 
 ---
 
-## 🌐 Configuração Obrigatória do Google Chrome (Disponível no vídeo de configuração)
+## 🌐 Configuração Obrigatória do Google Chrome (Disponível no Vídeo Tutorial de Configuração)
 
 ### ⚠️ Desabilitar Aceleração Gráfica
 
@@ -65,7 +65,7 @@ A aceleração gráfica pode causar conflitos com a captura de tela do OBS, resu
 
 ---
 
-## 🪟 Configuração Obrigatória do Windows (Disponível no vídeo de configuração)
+## 🪟 Configuração Obrigatória do Windows (Disponível no Vídeo Tutorial de Configuração)
 
 ### ⚙️ Configurar OBS para Alto Desempenho Gráfico
 
@@ -90,7 +90,7 @@ Garante que a GPU dedicada (se disponível) seja usada pelo OBS, melhorando dras
 
 ---
 
-## Configuração Obrigatória do OBS Studio (Não disponível no vídeo de configuração)
+## Configuração Obrigatória do OBS Studio (Não disponível no Vídeo Tutorial de Configuração)
 
 ### ⌨️ Configurar Atalhos Globais
 
