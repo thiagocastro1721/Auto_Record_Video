@@ -129,7 +129,7 @@ Esta etapa é **opcional**. O script pode ser executado diretamente do Visual St
 
 **💡 Por que gerar um executável?**
 - Não precisa abrir IDE toda vez
-- Duplo clique para executar
+- Clique único para executar
 - Mais prático para uso frequente
 
 ### Passo a Passo para Criar o Executável
