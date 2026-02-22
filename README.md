@@ -140,30 +140,30 @@ pip install pyinstaller
 Navegue até a pasta do script no CMD e execute:
 
 ```bash
-python -m PyInstaller --onefile --noconsole obs_automacao.py
+python -m PyInstaller --onefile --noconsole Auto_Record_Video.py
 ```
 
 #### 3️⃣ Localizar o Executável
 
 ```
-dist\obs_automacao.exe  ⭐ SEU EXECUTÁVEL AQUI
+dist\Auto_Record_Video.exe  ⭐ SEU EXECUTÁVEL AQUI
 ```
 
 #### 4️⃣ Arquivos gerados junto ao executável
 
-O script cria automaticamente um arquivo `obs_automacao_config.json` na mesma pasta do `.exe` para salvar suas preferências (ex: clique duplo para pausar). Mantenha esse arquivo junto ao executável.
+O script cria automaticamente um arquivo `Auto_Record_Video_config.json` na mesma pasta do `.exe` para salvar suas preferências (ex: clique duplo para pausar). Mantenha esse arquivo junto ao executável.
 
 ### 🎨 Adicionar Ícone Personalizado (Opcional)
 
 ```bash
-python -m PyInstaller --onefile --noconsole --icon=icone.ico obs_automacao.py
+python -m PyInstaller --onefile --noconsole --icon=icone.ico Auto_Record_Video.py
 ```
 
 ### 🚨 Solução de Problemas - PyInstaller
 
 **Executável não abre / fecha imediatamente** — remova `--noconsole` para ver os erros:
 ```bash
-python -m PyInstaller --onefile obs_automacao.py
+python -m PyInstaller --onefile Auto_Record_Video.py
 ```
 
 **Antivírus bloqueia** — é falso positivo comum com PyInstaller. Adicione exceção no antivírus.
@@ -209,7 +209,7 @@ Mensagem de conclusão
 
 ### Executando o Script
 
-1. Execute: `python obs_automacao.py` (ou o `.exe`)
+1. Execute: `python Auto_Record_Video.py` (ou o `.exe`)
 
 2. **Primeira janela:** Leia as instruções e clique em **"OK"**
 
@@ -334,4 +334,3 @@ Este script é fornecido "como está", para uso pessoal e educacional.
 ---
 
 **Desenvolvido para Windows 11** | Última atualização: 2026
-
