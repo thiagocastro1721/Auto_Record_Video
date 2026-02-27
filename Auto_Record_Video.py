@@ -34,9 +34,10 @@ CONFIG_FILE = os.path.join(_BASE_DIR, "obs_automacao_config.json")
 def carregar_config():
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-            return {**{"clique_duplo_pausa": True}, **json.load(f)}
+            defaults = {"clique_duplo_pausa": True, "reduzir_brilho": False, "mutar_audio": False}
+            return {**defaults, **json.load(f)}
     except Exception:
-        return {"clique_duplo_pausa": True}
+        return {"clique_duplo_pausa": True, "reduzir_brilho": False, "mutar_audio": False}
 
 def salvar_config(config: dict):
     try:
@@ -44,6 +45,101 @@ def salvar_config(config: dict):
             json.dump(config, f, indent=2, ensure_ascii=False)
     except Exception as e:
         print(f"⚠️ Não foi possível salvar configurações: {e}")
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── BRILHO ────────────────────────────────────────────────────────────────────
+def obter_brilho_atual():
+    """Retorna o brilho atual (0-100) via PowerShell, ou None em caso de erro."""
+    try:
+        saida = subprocess.check_output(
+            ["powershell", "-Command",
+             "(Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightness).CurrentBrightness"],
+            stderr=subprocess.DEVNULL,
+            startupinfo=_startupinfo_oculto()
+        ).decode(errors='ignore').strip()
+        return int(saida)
+    except Exception:
+        return None
+
+def definir_brilho(nivel: int):
+    """Define o brilho (0-100) via PowerShell."""
+    try:
+        subprocess.run(
+            ["powershell", "-Command",
+             f"(Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods)"
+             f".WmiSetBrightness(1,{nivel})"],
+            stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            startupinfo=_startupinfo_oculto()
+        )
+        print(f"💡 Brilho definido para {nivel}%")
+    except Exception as e:
+        print(f"⚠️ Não foi possível alterar brilho: {e}")
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── ÁUDIO (MUTE SISTEMA) — pycaw (Windows Core Audio API) ────────────────────
+#
+# pycaw é a biblioteca padrão Python para controle de áudio no Windows.
+# Instalar: pip install pycaw
+# Encapsula IMMDeviceEnumerator + IAudioEndpointVolume de forma confiável.
+
+def _definir_mute_ps(mutar: bool):
+    """
+    Muta/desmuta o dispositivo de áudio padrão via pycaw (Core Audio API).
+    Determinístico: define o estado explicitamente, sem toggle.
+    """
+    try:
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from comtypes import CLSCTX_ALL
+
+        devices = AudioUtilities.GetSpeakers()
+        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        volume = interface.QueryInterface(IAudioEndpointVolume)
+        volume.SetMute(1 if mutar else 0, None)
+
+        acao = "Áudio mutado 🔇" if mutar else "Áudio desmutado 🔊"
+        print(f"   ✓ {acao}")
+
+    except ImportError:
+        print("⚠️ pycaw não instalado. Execute: pip install pycaw")
+        print("   Tentando fallback via tecla mute...")
+        _mute_fallback_tecla(mutar)
+    except Exception as e:
+        print(f"⚠️ Erro ao alterar mute: {e}")
+        _mute_fallback_tecla(mutar)
+
+
+def _mute_fallback_tecla(mutar: bool):
+    """
+    Fallback: usa a tecla VK_VOLUME_MUTE.
+    Como é toggle, verifica o estado atual antes de agir.
+    """
+    # Tenta ler estado atual via PowerShell simples (sem Add-Type)
+    estado_atual = _obter_mute_ps()
+    if estado_atual is None:
+        # Não conseguiu ler — pressiona a tecla e torce
+        _pressionar_mute()
+        return
+    if estado_atual != mutar:
+        _pressionar_mute()
+
+
+def _obter_mute_ps() -> bool | None:
+    """Retorna None — leitura de mute via WMI não é suportada; usa toggle."""
+    return None
+
+
+def _pressionar_mute():
+    VK_VOLUME_MUTE = 0xAD
+    ctypes.windll.user32.keybd_event(VK_VOLUME_MUTE, 0, 0, 0)
+    time.sleep(0.05)
+    ctypes.windll.user32.keybd_event(VK_VOLUME_MUTE, 0, 2, 0)
+
+def _startupinfo_oculto():
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    si.wShowWindow = 0
+    return si
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _rodar_comando_oculto(args):
@@ -204,10 +300,15 @@ def executar_abort():
     sys.exit(0)
 
 def obter_duracao():
-    """Cria janela customizada com 3 campos: horas, minutos, segundos + opção de pausa."""
+    """Cria janela customizada com 3 campos: horas, minutos, segundos + opções."""
 
     config = carregar_config()
-    resultado = {'duracao': None, 'clique_duplo_pausa': config['clique_duplo_pausa']}
+    resultado = {
+        'duracao': None,
+        'clique_duplo_pausa': config['clique_duplo_pausa'],
+        'reduzir_brilho': config['reduzir_brilho'],
+        'mutar_audio': config['mutar_audio'],
+    }
 
     def confirmar():
         try:
@@ -242,7 +343,13 @@ def obter_duracao():
 
             resultado['duracao'] = total_segundos
             resultado['clique_duplo_pausa'] = var_clique_duplo.get()
-            salvar_config({'clique_duplo_pausa': resultado['clique_duplo_pausa']})
+            resultado['reduzir_brilho'] = var_reduzir_brilho.get()
+            resultado['mutar_audio'] = var_mutar_audio.get()
+            salvar_config({
+                'clique_duplo_pausa': resultado['clique_duplo_pausa'],
+                'reduzir_brilho': resultado['reduzir_brilho'],
+                'mutar_audio': resultado['mutar_audio'],
+            })
 
             janela.quit()
             janela.destroy()
@@ -256,7 +363,7 @@ def obter_duracao():
 
     janela = Tk()
     janela.title("⏱️ Duração da Gravação")
-    janela.geometry("420x310")  # altura aumentada para o checkbox
+    janela.geometry("420x430")
     janela.resizable(False, False)
     janela.attributes('-topmost', True)
     janela.lift()
@@ -264,8 +371,8 @@ def obter_duracao():
 
     janela.update_idletasks()
     x = (janela.winfo_screenwidth() // 2) - (420 // 2)
-    y = (janela.winfo_screenheight() // 2) - (310 // 2)
-    janela.geometry(f"420x310+{x}+{y}")
+    y = (janela.winfo_screenheight() // 2) - (430 // 2)
+    janela.geometry(f"420x430+{x}+{y}")
     janela.update()
     janela.deiconify()
 
@@ -299,14 +406,56 @@ def obter_duracao():
     Label(janela, text="💡 Use o teclado numérico",
           font=("Arial", 9), fg="gray").pack(pady=5)
 
-    # ── CHECKBOX persistente ──────────────────────────────────────────────────
+    # ── CHECKBOXES ────────────────────────────────────────────────────────────
+    frame_opcoes = Frame(janela)
+    frame_opcoes.pack(pady=5, padx=20, fill="x")
+
     var_clique_duplo = BooleanVar(value=config['clique_duplo_pausa'])
     Checkbutton(
-        janela,
+        frame_opcoes,
         text="Clique duplo para pausar (Painel de recomendações)",
         variable=var_clique_duplo,
         font=("Arial", 9),
-    ).pack(pady=5)
+        anchor="w",
+    ).pack(fill="x")
+
+    var_reduzir_brilho = BooleanVar(value=config['reduzir_brilho'])
+    Checkbutton(
+        frame_opcoes,
+        text="Reduzir brilho para 20% durante a gravação",
+        variable=var_reduzir_brilho,
+        font=("Arial", 9),
+        anchor="w",
+    ).pack(fill="x")
+
+    Label(
+        frame_opcoes,
+        text="   ℹ️ Funciona apenas em monitores internos (notebook).\n"
+             "   Monitores externos via HDMI/DP não são suportados.",
+        font=("Arial", 8),
+        fg="#555555",
+        justify="left",
+        anchor="w",
+    ).pack(fill="x", pady=(0, 4))
+
+    var_mutar_audio = BooleanVar(value=config['mutar_audio'])
+    Checkbutton(
+        frame_opcoes,
+        text="Mutar áudio do sistema durante a gravação",
+        variable=var_mutar_audio,
+        font=("Arial", 9),
+        anchor="w",
+    ).pack(fill="x")
+
+    Label(
+        frame_opcoes,
+        text="⚠️ Brilho/mute afetam apenas o monitor/som local,\n"
+             "    NÃO alteram a gravação do OBS.",
+        font=("Arial", 8),
+        fg="#B05000",
+        justify="left",
+        anchor="w",
+    ).pack(fill="x", pady=(2, 0))
     # ─────────────────────────────────────────────────────────────────────────
 
     frame_botoes = Frame(janela)
@@ -362,7 +511,6 @@ def main():
 
     root_msg.destroy()
 
-    # obter_duracao agora retorna dict com 'duracao' e 'clique_duplo_pausa'
     resultado = obter_duracao()
 
     if resultado['duracao'] is None:
@@ -371,6 +519,8 @@ def main():
 
     duracao_segundos = resultado['duracao']
     clique_duplo_pausa = resultado['clique_duplo_pausa']
+    reduzir_brilho = resultado['reduzir_brilho']
+    mutar_audio = resultado['mutar_audio']
 
     horas = duracao_segundos // 3600
     minutos = (duracao_segundos % 3600) // 60
@@ -380,6 +530,8 @@ def main():
     print(f"\n{'='*70}")
     print(f"  Duração configurada: {tempo_formatado} ({duracao_segundos} segundos)")
     print(f"  Clique duplo para pausar: {'Sim' if clique_duplo_pausa else 'Não'}")
+    print(f"  Reduzir brilho: {'Sim (→ 20%)' if reduzir_brilho else 'Não'}")
+    print(f"  Mutar áudio: {'Sim' if mutar_audio else 'Não'}")
     print(f"  🔥 CTRL+SHIFT+Q para abortar a qualquer momento")
     print(f"{'='*70}\n")
 
@@ -418,6 +570,20 @@ def main():
     chrome_windows[0].activate()
     time.sleep(1)
 
+    # ── APLICAR BRILHO / MUTE AGORA — antes do fullscreen, foco e gravação ───
+    # Qualquer som/transição do sistema ao mutar ocorre ANTES de o OBS gravar.
+    brilho_original = None
+    if reduzir_brilho:
+        brilho_original = obter_brilho_atual()
+        print(f"💡 Brilho original: {brilho_original}% → reduzindo para 20%")
+        definir_brilho(20)
+
+    if mutar_audio:
+        print("🔇 Mutando áudio do sistema...")
+        _definir_mute_ps(True)
+        time.sleep(1)  # aguarda sistema estabilizar
+    # ─────────────────────────────────────────────────────────────────────────
+
     print("🖥️ Fullscreen (F11)...")
     pyautogui.press('f11')
     time.sleep(1)
@@ -448,6 +614,8 @@ def main():
 
     while True:
         if deve_abortar:
+            # Restaurar antes de abortar
+            _restaurar_brilho_mute(brilho_original, mutar_audio)
             executar_abort()
 
         tempo_restante = tempo_fim - time.time()
@@ -473,6 +641,10 @@ def main():
     fechar_obs()
     time.sleep(3)
 
+    # ── RESTAURAR BRILHO / MUTE ───────────────────────────────────────────────
+    _restaurar_brilho_mute(brilho_original, mutar_audio)
+    # ─────────────────────────────────────────────────────────────────────────
+
     gravacao_ativa = False
 
     root_fim = Tk()
@@ -496,6 +668,16 @@ def main():
     print("="*70)
 
     keyboard.unhook_all()
+
+
+def _restaurar_brilho_mute(brilho_original, mutar_audio):
+    """Restaura brilho e mute ao estado original."""
+    if brilho_original is not None:
+        print(f"💡 Restaurando brilho para {brilho_original}%...")
+        definir_brilho(brilho_original)
+    if mutar_audio:
+        print("🔊 Restaurando áudio (desmutando)...")
+        _definir_mute_ps(False)
 
 
 if __name__ == "__main__":
