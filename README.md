@@ -155,6 +155,14 @@ pip install pyinstaller
 
 ### Gerar
 
+Antes de executar o comando, navegue no terminal até a pasta onde está o arquivo `Auto_Record_Video.py`. Por exemplo, se o arquivo estiver em `C:\Users\João\Downloads\automacao`:
+
+```bash
+cd C:\Users\João\Downloads\automacao
+```
+
+Em seguida, gere o executável:
+
 ```bash
 python -m PyInstaller --onefile --noconsole Auto_Record_Video.py
 ```
