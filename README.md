@@ -1,16 +1,16 @@
-# Automação de Gravação OBS com Chrome
+# Automação de Gravação OBS com WebSocket + Chrome
 
-Este script automatiza a gravação em **tela cheia** de vídeos executados no **Google Chrome**, utilizando o **OBS Studio** em segundo plano, sem necessidade de interação manual durante o processo.
+Este script automatiza a gravação em **tela cheia** de vídeos no **Google Chrome** usando o **OBS Studio**, controlado inteiramente via **WebSocket** — sem simular teclas de atalho, sem risco de conflito com digitação.
 
 ---
 
 ## Índice
 
 1. [Requisitos do Sistema](#requisitos-do-sistema)
-2. [Vídeo Tutorial de Configuração](#vídeo-tutorial-de-configuração)
-3. [Configuração do Google Chrome](#configuração-do-google-chrome)
-4. [Configuração do Windows](#configuração-do-windows)
-5. [Configuração do OBS Studio](#configuração-do-obs-studio)
+2. [Configuração do Google Chrome](#configuração-do-google-chrome)
+3. [Configuração do Windows](#configuração-do-windows)
+4. [Configuração do OBS Studio](#configuração-do-obs-studio)
+5. [Ajuste de Sincronização (OVERHEAD_FINALIZACAO)](#ajuste-de-sincronização-overhead_finalizacao)
 6. [Gerar Executável (Opcional)](#gerar-executável-opcional)
 7. [Como Usar](#como-usar-o-script)
 8. [Atalhos de Teclado](#atalhos-de-teclado)
@@ -23,142 +23,143 @@ Este script automatiza a gravação em **tela cheia** de vídeos executados no *
 - **Sistema Operacional:** Windows 11 (desenvolvido e testado)
 - **Software Necessário:**
   - Google Chrome (atualizado)
-  - OBS Studio (versão 28 ou superior recomendada)
-  - Python 3.8+ com as bibliotecas: `pyautogui`, `pydirectinput`, `pygetwindow`, `keyboard`
-- **Hardware:** Recomenda-se RAM suficiente (8GB+) e processador razoável para gravação fluida
+  - OBS Studio 28 ou superior (o servidor WebSocket está embutido a partir dessa versão)
+  - Python 3.8+ com as bibliotecas abaixo
 
-> **💡 Teclado numérico não é mais obrigatório.** O OBS abre automaticamente *depois* que você digita a duração, portanto não há conflito entre o teclado numérico e os atalhos do OBS. Você pode usar qualquer teclado.
+### Instalação das Dependências Python
 
----
+```bash
+pip install pyautogui pygetwindow keyboard obsws-python pycaw
+```
 
-## Vídeo Tutorial de Configuração
-
-Se preferir assistir um vídeo explicativo sobre as configurações de Chrome e Windows, acesse:
-
-**🔗 [Tutorial em Vídeo - Configuração Completa](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
-
-Este vídeo mostra visualmente:
-- ✅ Como desabilitar aceleração gráfica no Chrome
-- ✅ Como configurar alto desempenho gráfico no Windows
+| Biblioteca | Função |
+|---|---|
+| `pyautogui` | Controle de mouse e teclado |
+| `pygetwindow` | Localizar janelas abertas |
+| `keyboard` | Hotkey global CTRL+SHIFT+Q |
+| `obsws-python` | Comunicação com OBS via WebSocket |
+| `pycaw` | Mutar áudio do sistema (opcional) |
 
 ---
 
 ## Configuração do Google Chrome
 
-> ✅ Disponível no Vídeo Tutorial de Configuração
-
 ### ⚠️ Desabilitar Aceleração Gráfica
 
-Esta etapa é **ESSENCIAL** para evitar travamentos e garantir gravação suave.
+Esta etapa é **essencial** para evitar tela preta ou travamentos na captura do OBS.
 
-**Passo a passo:**
-
-1. Abra o Google Chrome
-2. Cole este endereço na barra de navegação e pressione Enter:
+1. Abra o Chrome e cole na barra de endereços:
    ```
    chrome://settings/system
    ```
-3. Localize a opção: **"Usar aceleração gráfica quando disponível"**
-4. **Desative** esta opção (o botão deve ficar cinza/desligado)
-5. Reinicie o Chrome para aplicar as mudanças
-
-**📌 Por que fazer isso?**
-A aceleração gráfica pode causar conflitos com a captura de tela do OBS, resultando em tela preta ou travamentos.
+2. Localize **"Usar aceleração gráfica quando disponível"** e **desative**.
+3. Reinicie o Chrome.
 
 ---
 
 ## Configuração do Windows
 
-> ✅ Disponível no Vídeo Tutorial de Configuração
-
 ### ⚙️ Configurar OBS para Alto Desempenho Gráfico
 
-Esta configuração garante que o Windows priorize o desempenho do OBS.
-
-**Passo a passo detalhado:**
-
-1. Clique no **botão Iniciar** do Windows
-2. Vá em **Configurações** (ícone de engrenagem ⚙️)
-3. Navegue até: **Sistema** → **Tela**
-4. Role até encontrar e clique em: **Configurações de elementos gráficos**
-5. Clique no botão **"Procurar"**
-6. Navegue até a pasta de instalação do OBS:
-   - Normalmente está em: `C:\Program Files\obs-studio\bin\64bit\obs64.exe`
-7. Selecione o arquivo **`obs64.exe`** e clique em **"Adicionar"**
-8. Com o OBS já listado, clique no botão **"Opções"** ao lado dele
-9. Selecione a opção: **"Alto desempenho"**
-10. Clique em **"Salvar"**
-
-**📌 Por que fazer isso?**
-Garante que a GPU dedicada (se disponível) seja usada pelo OBS, melhorando drasticamente a qualidade e performance da gravação.
+1. Abra **Configurações do Windows** → **Sistema** → **Tela**
+2. Clique em **Configurações de elementos gráficos**
+3. Clique em **Procurar** e navegue até:
+   ```
+   C:\Program Files\obs-studio\bin\64bit\obs64.exe
+   ```
+4. Com o OBS listado, clique em **Opções** → selecione **Alto desempenho** → **Salvar**
 
 ---
 
 ## Configuração do OBS Studio
 
-> ⚠️ Não disponível no Vídeo Tutorial de Configuração — siga os passos abaixo
+> ⚠️ Esta é a etapa mais importante desta versão. O script controla o OBS **exclusivamente via WebSocket** — não são mais necessários atalhos de teclado no OBS.
 
-### Configurar Atalhos Globais
+### 1. Ativar o Servidor WebSocket
 
-O script precisa que o OBS responda a comandos mesmo quando está em segundo plano.
+1. Abra o OBS Studio
+2. Vá em **Ferramentas** → **Configurações do WebSocket Server**
+3. Marque **✓ Ativar servidor WebSocket**
+4. Confirme que a porta está em **4455**
+5. Defina uma senha (opcional, mas recomendado):
+   - Se definir senha, anote — você precisará informá-la na tela de configuração do script
+   - Se preferir sem senha, deixe o campo em branco
+6. Clique em **OK**
+7. **Feche o OBS** — o script o abrirá automaticamente no momento certo
 
-**Passo a passo:**
+> **💡 Dica:** Use o botão **"Testar"** na janela de duração do script para verificar se a conexão WebSocket está funcionando antes de iniciar a gravação.
 
-1. Abra o **OBS Studio**
-2. Vá em: **Arquivo** → **Configurações** (ou pressione `Ctrl + ,`)
-3. No menu lateral, clique em **"Atalhos de Teclado"**
-4. Localize as seguintes opções e configure:
+### 2. Verificar Caminho do OBS
 
-   | Função | Atalho |
-   |--------|--------|
-   | **Iniciar Gravação** | Tecla **1** (alfanumérica) |
-   | **Parar Gravação** | Tecla **2** (alfanumérica) |
+Por padrão, o script espera o OBS em:
+```
+C:\Program Files\obs-studio\bin\64bit\obs64.exe
+```
 
-5. Clique em **"Aplicar"** e depois em **"OK"**
-6. **Feche o OBS** após configurar — o script o abrirá automaticamente na hora certa.
+Se o seu OBS estiver instalado em outro local, edite as constantes no início do script:
 
-**📌 Importante:**
-- Use as teclas **1** e **2** da linha principal do teclado (acima das letras Q, W, E)
-- **NÃO** use o teclado numérico (Numpad) para esses atalhos
+```python
+OBS_EXE = r"C:\Program Files\obs-studio\bin\64bit\obs64.exe"
+OBS_CWD = r"C:\Program Files\obs-studio\bin\64bit"
+```
+
+### 3. Sobre Atalhos de Teclado no OBS
+
+**Não é mais necessário configurar atalhos** de gravação no OBS. O script usa WebSocket para iniciar e parar a gravação diretamente, sem simular teclas. Isso elimina qualquer risco de acionar a gravação acidentalmente ao digitar a duração.
+
+---
+
+## Ajuste de Sincronização (OVERHEAD_FINALIZACAO)
+
+Ao terminar a gravação, o script executa algumas ações (parar WebSocket, pausar vídeo, sair do fullscreen) que consomem alguns segundos. Para compensar esse tempo e fazer com que a duração gravada corresponda exatamente à duração configurada, existe a constante:
+
+```python
+OVERHEAD_FINALIZACAO = 0
+```
+
+### Como calibrar
+
+1. Configure uma gravação de teste de **1 minuto** (60 segundos)
+2. Após finalizar, verifique a duração real do arquivo gravado no OBS
+3. Calcule a diferença:
+   - Se o arquivo ficou **com mais tempo** do que o esperado → **aumente** `OVERHEAD_FINALIZACAO`
+   - Se ficou **com menos tempo** → **diminua** (ou deixe em 0)
+
+**Exemplo:** você configurou 60s e o arquivo ficou com 63s → defina `OVERHEAD_FINALIZACAO = 3`.
+
+O valor é subtraído da duração do loop de espera, fazendo o script parar a gravação um pouco antes do tempo nominal para compensar o tempo das ações de finalização.
 
 ---
 
 ## Gerar Executável (Opcional)
 
-Esta etapa é **opcional**. O script pode ser executado diretamente do Visual Studio Code, Thonny, PyCharm ou qualquer terminal com Python.
-
-**💡 Por que gerar um executável?**
-- Não precisa abrir IDE toda vez
-- Clique único para executar
-- Mais prático para uso frequente
-
-### Passo a Passo para Criar o Executável
-
-#### 1. Instalar o PyInstaller
+### Instalação
 
 ```bash
 pip install pyinstaller
 ```
 
-#### 2. Gerar o Executável
-
-Navegue até a pasta do script no CMD e execute:
+### Gerar
 
 ```bash
 python -m PyInstaller --onefile --noconsole Auto_Record_Video.py
 ```
 
-#### 3. Localizar o Executável
-
+O executável ficará em:
 ```
-dist\Auto_Record_Video.exe  ⭐ SEU EXECUTÁVEL AQUI
+dist\Auto_Record_Video.exe
 ```
 
-#### 4. Arquivos gerados junto ao executável
+### Arquivos gerados junto ao executável
 
-O script cria automaticamente um arquivo `Auto_Record_Video_config.json` na mesma pasta do `.exe` para salvar suas preferências (ex: clique duplo para pausar). Mantenha esse arquivo junto ao executável.
+O script salva automaticamente suas preferências em:
+```
+obs_automacao_config.json
+```
 
-### Adicionar Ícone Personalizado (Opcional)
+Mantenha esse arquivo na mesma pasta do `.exe` para preservar suas configurações entre execuções.
+
+### Com ícone personalizado
 
 ```bash
 python -m PyInstaller --onefile --noconsole --icon=icone.ico Auto_Record_Video.py
@@ -166,12 +167,12 @@ python -m PyInstaller --onefile --noconsole --icon=icone.ico Auto_Record_Video.p
 
 ### Solução de Problemas com PyInstaller
 
-**Executável não abre / fecha imediatamente** — remova `--noconsole` para ver os erros:
+Se o executável fechar imediatamente, remova `--noconsole` para ver os erros:
 ```bash
 python -m PyInstaller --onefile Auto_Record_Video.py
 ```
 
-**Antivírus bloqueia** — é falso positivo comum com PyInstaller. Adicione exceção no antivírus.
+Antivírus bloqueando? É falso positivo comum com PyInstaller — adicione exceção.
 
 ---
 
@@ -184,127 +185,110 @@ Iniciar script
     ↓
 Ler instruções → OK
     ↓
-Digitar duração + opções → Confirmar
+Digitar duração + configurar senha WebSocket + opções → Confirmar
     ↓
 OBS abre automaticamente (se não estiver aberto)
     ↓
-Chrome ativa → Tela cheia → Gravação inicia
+Conexão WebSocket validada
+    ↓
+Chrome ativa → Tela cheia → Gravação inicia via WebSocket
     ↓
 [aguarda duração configurada]
     ↓
-Gravação para → Vídeo pausa → Sai do fullscreen → OBS fecha
+Gravação para via WebSocket → Vídeo pausa → Sai do fullscreen → OBS fecha
     ↓
 Mensagem de conclusão
 ```
 
-### Sobre o OBS antes de iniciar
+### Preparação antes de executar
 
-| Situação | O que acontece |
-|----------|---------------|
-| **OBS fechado** ✅ | O script abre automaticamente após você digitar a duração. Sem conflitos. |
-| **OBS já aberto** ⚠️ | O script detecta e usa o OBS existente, mas **os atalhos do OBS (teclas 1 e 2) ficam ativos enquanto você digita a duração**, podendo iniciar/parar gravação acidentalmente. |
+1. ✅ **OBS fechado** — será aberto automaticamente
+2. ✅ **Chrome aberto** com o vídeo carregado e pausado no início
+3. ✅ **WebSocket configurado** no OBS com a senha definida (se houver)
+4. ✅ Você tem **tempo livre** — não mexa no mouse/teclado durante a gravação
 
-**Recomendação:** deixe o OBS fechado antes de iniciar o script. Ele será aberto automaticamente no momento correto.
+### Passo a passo
 
-### Preparação Antes de Executar
+1. Execute `python Auto_Record_Video.py` (ou o `.exe`)
 
-1. ✅ **OBS fechado** (será aberto automaticamente)
-2. ✅ **Google Chrome** aberto com o vídeo carregado e pausado
-3. ✅ Você tem **tempo livre** — não mexa no computador durante a gravação
+2. Leia as instruções na primeira janela e clique **OK**
 
-### Executando o Script
-
-1. Execute: `python Auto_Record_Video.py` (ou o `.exe`)
-
-2. **Primeira janela:** Leia as instruções e clique em **"OK"**
-
-3. **Segunda janela — Duração:**
+3. Na janela de duração:
    - Digite horas, minutos e segundos
-   - Marque ou desmarque **"Clique duplo para pausar"** conforme seu player:
-     - ✅ **Marcado** (padrão): recomendado para YouTube — o 1º clique fecha o painel de recomendações e o 2º pausa
-     - ☐ **Desmarcado**: para players que pausam com um único clique
-   - Esta preferência é **salva automaticamente** para a próxima execução
-   - Pressione **Enter** ou clique em **"✓ Confirmar"**
+   - No campo **Senha WebSocket**, informe a senha configurada no OBS (deixe em branco se não definiu senha)
+   - Clique em **Testar** para confirmar que a conexão com o OBS está funcionando
+   - Marque ou desmarque as opções conforme necessário:
 
-4. **Automação em ação** (não toque no mouse/teclado):
-   - OBS abre e inicializa (~10 segundos)
-   - Chrome entra em tela cheia
-   - Gravação inicia automaticamente
-   - Script aguarda o tempo configurado
-   - Gravação finaliza, vídeo pausa, OBS fecha
+   | Opção | Descrição |
+   |---|---|
+   | **Clique duplo para pausar** | Recomendado para YouTube — 1º clique fecha painel de recomendações, 2º pausa o vídeo |
+   | **Reduzir brilho para 20%** | Funciona apenas em monitores internos (notebook). Não afeta a gravação. |
+   | **Mutar áudio do sistema** | Silencia o som local durante a gravação. Não afeta o áudio gravado pelo OBS. |
 
-5. **Finalização:**
-   - Uma janela confirma que a gravação foi concluída
-   - O vídeo está salvo na pasta de gravações do OBS
+   - Pressione **Enter** ou clique em **✓ Confirmar**
 
-### Onde encontrar o vídeo gravado?
+4. A automação começa — **não toque no mouse ou teclado**
+
+5. Ao finalizar, uma janela confirma a conclusão
+
+### Onde encontrar o vídeo gravado
 
 Por padrão, o OBS salva em:
 ```
 C:\Users\[SeuUsuário]\Videos\
 ```
 
-Você pode verificar/alterar em: **OBS** → **Configurações** → **Saída** → **Caminho de Gravação**
+Verifique ou altere em: **OBS** → **Configurações** → **Saída** → **Caminho de Gravação**
 
 ---
 
 ## Atalhos de Teclado
 
-| Atalho | Função | Quando usar |
-|--------|--------|-------------|
-| **Ctrl + Shift + Q** | Abortar gravação | Durante a gravação, para parar antecipadamente |
-| **Enter** | Confirmar duração | Na janela de configuração de tempo |
-| **Esc** | Cancelar | Na janela de configuração de tempo |
+| Atalho | Função |
+|---|---|
+| **Ctrl + Shift + Q** | Aborta a gravação a qualquer momento |
+| **Enter** | Confirma a duração na janela de configuração |
+| **Esc** | Cancela a janela de configuração |
 
-### Como Abortar a Gravação
+### Como abortar
 
-Pressione **Ctrl + Shift + Q** a qualquer momento. O script irá parar a gravação do OBS, sair do modo tela cheia, salvar o vídeo parcial e mostrar uma mensagem de confirmação.
+Pressione **Ctrl + Shift + Q** durante a gravação. O script irá:
+- Parar a gravação via WebSocket
+- Sair do modo tela cheia
+- Restaurar brilho e áudio (se alterados)
+- Fechar o OBS
+- Exibir mensagem confirmando que o vídeo parcial foi salvo
 
 ---
 
 ## Solução de Problemas
 
-### Problema: Gravação iniciou sozinha ao digitar a duração
+**"WebSocket indisponível" ao iniciar**
+Verifique no OBS: **Ferramentas** → **Configurações do WebSocket Server** → confirme que está ativado na porta 4455 com a senha correta.
 
-**Causa:** O OBS estava aberto antes de iniciar o script, e os atalhos (teclas 1 e 2) ficaram ativos durante a digitação.
+**Botão "Testar" retorna falha mas o OBS está aberto**
+O servidor WebSocket pode demorar alguns segundos para inicializar após o OBS abrir. Aguarde 5–10 segundos e tente novamente.
 
-**Solução:** Feche o OBS antes de iniciar o script. Ele abrirá automaticamente no momento certo.
+**"Chrome não encontrado"**
+Certifique-se de que o Chrome está aberto com pelo menos uma aba ativa antes de iniciar o script.
 
-### Problema: "Chrome não encontrado"
+**Tela preta na gravação**
+Desabilite a aceleração gráfica do Chrome (veja seção correspondente acima).
 
-**Solução:** Certifique-se de que o Chrome está aberto com uma aba ativa.
+**Gravação com duração diferente da configurada**
+Ajuste a constante `OVERHEAD_FINALIZACAO` no script (veja seção de sincronização acima).
 
-### Problema: Gravação não inicia no OBS
-
-**Soluções:**
-1. Verifique se os atalhos estão configurados (tecla **1** para iniciar, **2** para parar)
-2. Confirme que são atalhos **globais**
-3. Teste manualmente: pressione a tecla **1** com o OBS aberto
-
-### Problema: Tela preta na gravação
-
-**Soluções:**
-1. Desabilite a aceleração gráfica do Chrome
-2. Use "Captura de Janela" em vez de "Captura de Tela" no OBS
-
-### Problema: Gravação com segundos a mais ou a menos
-
-**Solução:** Ajuste a constante `OVERHEAD_FINALIZACAO` no script. Aumente se gravar a mais, diminua se gravar a menos.
-
-### Problema: Ctrl + Shift + Q não funciona
-
-**Soluções:**
-1. Execute o script como **Administrador**
-2. Verifique se outro programa não está usando esse atalho
+**Ctrl + Shift + Q não responde**
+Execute o script como **Administrador**.
 
 ---
 
 ## Dicas de Otimização
 
-1. **Feche programas desnecessários** antes de gravar
-2. **Use modo "Alto desempenho"** nas configurações de energia do Windows
-3. **Tenha espaço em disco suficiente** (pelo menos 10GB livres)
-4. **Conecte o notebook na tomada** (não use bateria)
+- Feche programas desnecessários antes de gravar
+- Use modo **Alto desempenho** nas configurações de energia do Windows
+- Tenha pelo menos **10 GB livres** em disco
+- Conecte o notebook na tomada durante gravações longas
 
 ### Configurações Recomendadas do OBS
 
@@ -318,23 +302,8 @@ Pressione **Ctrl + Shift + Q** a qualquer momento. O script irá parar a gravaç
 ## Notas Finais
 
 - ⚠️ **Não mexa no mouse/teclado** após confirmar a duração
-- ⚠️ Planeje antecipadamente: calcule a duração correta do vídeo
-- ✅ Teste primeiro com vídeos curtos (20–30 segundos) para calibrar o tempo
-
----
-
-## Suporte
-
-Se encontrar problemas não listados aqui:
-1. Revise todas as configurações acima
-2. Teste os atalhos do OBS manualmente
-3. Verifique o console do Python para mensagens de erro
-
----
-
-## Licença
-
-Este script é fornecido "como está", para uso pessoal e educacional.
+- ⚠️ Calcule bem a duração antes de iniciar
+- ✅ Faça um teste curto (20–30 segundos) para calibrar o `OVERHEAD_FINALIZACAO` antes de gravações longas
 
 ---
 
