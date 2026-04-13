@@ -42,6 +42,20 @@ pip install pyautogui pygetwindow keyboard obsws-python pycaw
 
 ---
 
+## Vídeo Tutorial de Configuração
+
+Se preferir assistir um vídeo explicativo sobre as configurações de Chrome e Windows, acesse:
+
+**🔗 [Tutorial em Vídeo - Configuração Completa](https://www.youtube.com/watch?v=PGMaGwt10Aw)**
+
+Este vídeo mostra visualmente:
+- ✅ Como desabilitar aceleração gráfica no Chrome
+- ✅ Como configurar alto desempenho gráfico no Windows
+
+> ⚠️ A configuração do WebSocket do OBS **não está coberta no vídeo** — siga a seção correspondente abaixo.
+
+---
+
 ## Configuração do Google Chrome
 
 ### ⚠️ Desabilitar Aceleração Gráfica
